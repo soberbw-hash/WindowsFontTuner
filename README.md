@@ -78,6 +78,23 @@ Fields:
 3. Document official font download links instead of redistributing proprietary font files.
 4. Tag releases with the built exe if you want a simple download for non-technical users.
 
+## Publish To GitHub
+
+This folder is already ready to be used as a Git repository.
+
+After you create an empty GitHub repository, run:
+
+```bat
+git remote add origin https://github.com/<your-name>/WindowsFontTuner.git
+git push -u origin main
+```
+
+If you want to attach a ready-to-run build to a GitHub release, use the contents of:
+
+```text
+bin\Release\
+```
+
 ## Notes
 
 - Windows 11 shell typography is split across multiple systems. Some surfaces honor these settings, some only partially do.
