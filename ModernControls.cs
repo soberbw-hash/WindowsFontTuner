@@ -7,24 +7,30 @@ namespace WindowsFontTuner
 {
     internal static class UiPalette
     {
-        public static readonly Color WindowBackground = Color.FromArgb(240, 245, 251);
-        public static readonly Color CardBackground = Color.FromArgb(232, 252, 253, 255);
-        public static readonly Color Border = Color.FromArgb(214, 225, 239);
-        public static readonly Color Accent = Color.FromArgb(46, 94, 196);
-        public static readonly Color AccentHover = Color.FromArgb(38, 84, 180);
-        public static readonly Color AccentPressed = Color.FromArgb(32, 73, 163);
-        public static readonly Color AccentSoft = Color.FromArgb(233, 240, 252);
-        public static readonly Color Secondary = Color.FromArgb(249, 251, 253);
-        public static readonly Color SecondaryHover = Color.FromArgb(242, 246, 251);
-        public static readonly Color SecondaryPressed = Color.FromArgb(235, 241, 248);
-        public static readonly Color TextPrimary = Color.FromArgb(26, 33, 52);
-        public static readonly Color TextSecondary = Color.FromArgb(84, 96, 122);
-        public static readonly Color TextMuted = Color.FromArgb(113, 125, 148);
-        public static readonly Color Success = Color.FromArgb(14, 136, 95);
-        public static readonly Color Warning = Color.FromArgb(191, 112, 16);
-        public static readonly Color Danger = Color.FromArgb(184, 64, 64);
-        public static readonly Color HeroStart = Color.FromArgb(235, 244, 255);
-        public static readonly Color HeroEnd = Color.FromArgb(249, 252, 255);
+        public static readonly Color WindowBackground = Color.FromArgb(242, 246, 251);
+        public static readonly Color SidebarBackground = Color.FromArgb(246, 249, 252);
+        public static readonly Color SidebarBorder = Color.FromArgb(225, 231, 239);
+        public static readonly Color CardBackground = Color.FromArgb(252, 253, 255);
+        public static readonly Color CardAltBackground = Color.FromArgb(247, 250, 253);
+        public static readonly Color Border = Color.FromArgb(223, 229, 237);
+        public static readonly Color BorderStrong = Color.FromArgb(210, 219, 230);
+        public static readonly Color Accent = Color.FromArgb(37, 99, 235);
+        public static readonly Color AccentHover = Color.FromArgb(29, 78, 216);
+        public static readonly Color AccentPressed = Color.FromArgb(30, 64, 175);
+        public static readonly Color AccentSoft = Color.FromArgb(233, 242, 255);
+        public static readonly Color AccentSoftStrong = Color.FromArgb(220, 234, 255);
+        public static readonly Color AccentTextSoft = Color.FromArgb(24, 73, 177);
+        public static readonly Color TextPrimary = Color.FromArgb(19, 26, 38);
+        public static readonly Color TextSecondary = Color.FromArgb(84, 98, 121);
+        public static readonly Color TextMuted = Color.FromArgb(120, 132, 152);
+        public static readonly Color Success = Color.FromArgb(10, 133, 88);
+        public static readonly Color SuccessSoft = Color.FromArgb(231, 248, 240);
+        public static readonly Color Warning = Color.FromArgb(191, 111, 20);
+        public static readonly Color WarningSoft = Color.FromArgb(255, 245, 229);
+        public static readonly Color Danger = Color.FromArgb(188, 63, 63);
+        public static readonly Color DangerSoft = Color.FromArgb(252, 238, 238);
+        public static readonly Color HeroStart = Color.FromArgb(238, 245, 255);
+        public static readonly Color HeroEnd = Color.FromArgb(250, 252, 255);
     }
 
     internal static class UiGeometry
@@ -172,9 +178,9 @@ namespace WindowsFontTuner
             {
                 if (_showShadow)
                 {
-                    Rectangle shadowBounds = new Rectangle(0, 6, Width - 1, Height - 7);
+                    Rectangle shadowBounds = new Rectangle(0, 10, Width - 1, Height - 11);
                     using (GraphicsPath shadowPath = UiGeometry.CreateRoundedRectangle(shadowBounds, _cornerRadius))
-                    using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(18, 36, 53, 79)))
+                    using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(14, 15, 23, 42)))
                     {
                         e.Graphics.FillPath(shadowBrush, shadowPath);
                     }
@@ -182,7 +188,11 @@ namespace WindowsFontTuner
 
                 if (_useGradient)
                 {
-                    using (LinearGradientBrush brush = new LinearGradientBrush(bounds, _gradientStartColor, _gradientEndColor, LinearGradientMode.ForwardDiagonal))
+                    using (LinearGradientBrush brush = new LinearGradientBrush(
+                        bounds,
+                        _gradientStartColor,
+                        _gradientEndColor,
+                        LinearGradientMode.ForwardDiagonal))
                     {
                         e.Graphics.FillPath(brush, path);
                     }
@@ -197,15 +207,14 @@ namespace WindowsFontTuner
 
                 if (_showGlow)
                 {
-                    using (SolidBrush glow = new SolidBrush(Color.FromArgb(70, 255, 255, 255)))
+                    using (SolidBrush glowBrush = new SolidBrush(Color.FromArgb(70, 255, 255, 255)))
                     {
-                        e.Graphics.FillEllipse(glow, new Rectangle(Width - 180, -30, 210, 210));
-                        e.Graphics.FillEllipse(glow, new Rectangle(Width - 110, 18, 120, 120));
+                        e.Graphics.FillEllipse(glowBrush, new Rectangle(Width - 200, -20, 220, 220));
                     }
 
-                    using (SolidBrush accent = new SolidBrush(Color.FromArgb(44, UiPalette.Accent)))
+                    using (SolidBrush accentBrush = new SolidBrush(Color.FromArgb(34, UiPalette.Accent)))
                     {
-                        e.Graphics.FillEllipse(accent, new Rectangle(-38, Height - 110, 145, 145));
+                        e.Graphics.FillEllipse(accentBrush, new Rectangle(-45, Height - 118, 155, 155));
                     }
                 }
 
@@ -250,9 +259,9 @@ namespace WindowsFontTuner
             TabStop = true;
             Cursor = Cursors.Hand;
             DoubleBuffered = true;
-            Height = 36;
-            Width = 128;
-            Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.2f, FontStyle.Regular);
+            Height = 38;
+            Width = 132;
+            Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.3f, FontStyle.Regular);
             ForeColor = UiPalette.TextPrimary;
             BackColor = Color.Transparent;
         }
@@ -339,26 +348,26 @@ namespace WindowsFontTuner
 
             if (_buttonStyle == ModernButtonStyle.Primary)
             {
-                fill = _pressed
-                    ? Color.FromArgb(214, 227, 248)
-                    : (_hovered ? Color.FromArgb(224, 235, 251) : UiPalette.AccentSoft);
-                border = _pressed
-                    ? Color.FromArgb(152, 182, 231)
-                    : (_hovered ? Color.FromArgb(165, 194, 239) : Color.FromArgb(184, 206, 240));
-                textColor = UiPalette.Accent;
+                fill = _pressed ? UiPalette.AccentPressed : (_hovered ? UiPalette.AccentHover : UiPalette.Accent);
+                border = fill;
+                textColor = Color.White;
                 return;
             }
 
             if (_buttonStyle == ModernButtonStyle.Ghost)
             {
-                fill = _pressed ? Color.FromArgb(236, 241, 248) : (_hovered ? Color.FromArgb(244, 247, 251) : ResolveSurfaceColor());
-                border = _hovered || _pressed ? Color.FromArgb(225, 231, 240) : ResolveSurfaceColor();
+                fill = _pressed
+                    ? Color.FromArgb(236, 241, 247)
+                    : (_hovered ? Color.FromArgb(245, 248, 252) : ResolveSurfaceColor());
+                border = _hovered || _pressed ? UiPalette.Border : ResolveSurfaceColor();
                 textColor = UiPalette.TextSecondary;
                 return;
             }
 
-            fill = _pressed ? UiPalette.SecondaryPressed : (_hovered ? UiPalette.SecondaryHover : UiPalette.Secondary);
-            border = Color.FromArgb(225, 231, 240);
+            fill = _pressed
+                ? Color.FromArgb(242, 246, 251)
+                : (_hovered ? Color.FromArgb(248, 250, 253) : UiPalette.CardBackground);
+            border = _hovered ? UiPalette.BorderStrong : UiPalette.Border;
             textColor = UiPalette.TextPrimary;
         }
 
@@ -377,6 +386,157 @@ namespace WindowsFontTuner
             }
 
             return UiPalette.WindowBackground;
+        }
+    }
+
+    public sealed class ModernNavButton : Button
+    {
+        private bool _hovered;
+        private bool _pressed;
+        private bool _selected;
+
+        public ModernNavButton()
+        {
+            FlatStyle = FlatStyle.Flat;
+            FlatAppearance.BorderSize = 0;
+            TabStop = true;
+            Cursor = Cursors.Hand;
+            DoubleBuffered = true;
+            Height = 42;
+            Width = 180;
+            Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.6f, FontStyle.Bold);
+            ForeColor = UiPalette.TextSecondary;
+            BackColor = Color.Transparent;
+            TextAlign = ContentAlignment.MiddleLeft;
+            Padding = new Padding(30, 0, 12, 0);
+        }
+
+        public bool Selected
+        {
+            get { return _selected; }
+            set
+            {
+                _selected = value;
+                Invalidate();
+            }
+        }
+
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            _hovered = true;
+            Invalidate();
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+            _hovered = false;
+            _pressed = false;
+            Invalidate();
+        }
+
+        protected override void OnMouseDown(MouseEventArgs mevent)
+        {
+            base.OnMouseDown(mevent);
+            _pressed = true;
+            Invalidate();
+        }
+
+        protected override void OnMouseUp(MouseEventArgs mevent)
+        {
+            base.OnMouseUp(mevent);
+            _pressed = false;
+            Invalidate();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            e.Graphics.Clear(ResolveSurfaceColor());
+
+            Rectangle bounds = new Rectangle(0, 0, Width - 1, Height - 1);
+            Color fill = Color.Transparent;
+            Color textColor = UiPalette.TextSecondary;
+            Color dotColor = Color.FromArgb(170, UiPalette.TextMuted);
+
+            if (_selected)
+            {
+                fill = UiPalette.AccentSoft;
+                textColor = UiPalette.AccentTextSoft;
+                dotColor = UiPalette.Accent;
+            }
+            else if (_pressed)
+            {
+                fill = Color.FromArgb(238, 243, 249);
+                textColor = UiPalette.TextPrimary;
+                dotColor = UiPalette.TextPrimary;
+            }
+            else if (_hovered)
+            {
+                fill = Color.FromArgb(245, 248, 251);
+                textColor = UiPalette.TextPrimary;
+                dotColor = UiPalette.TextSecondary;
+            }
+
+            using (GraphicsPath path = UiGeometry.CreateRoundedRectangle(bounds, 14))
+            using (SolidBrush brush = new SolidBrush(fill))
+            {
+                if (fill.A > 0)
+                {
+                    e.Graphics.FillPath(brush, path);
+                }
+            }
+
+            if (_selected)
+            {
+                using (SolidBrush accentBrush = new SolidBrush(UiPalette.Accent))
+                {
+                    e.Graphics.FillRoundedRectangle(accentBrush, new Rectangle(0, 9, 4, Height - 18), 4);
+                }
+            }
+
+            using (SolidBrush dotBrush = new SolidBrush(dotColor))
+            {
+                e.Graphics.FillEllipse(dotBrush, new Rectangle(12, (Height - 8) / 2, 8, 8));
+            }
+
+            Rectangle textBounds = new Rectangle(28, 0, Width - 40, Height);
+            TextRenderer.DrawText(
+                e.Graphics,
+                Text,
+                Font,
+                textBounds,
+                textColor,
+                TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+        }
+
+        private Color ResolveSurfaceColor()
+        {
+            Control current = Parent;
+
+            while (current != null)
+            {
+                if (current.BackColor.A > 0 && current.BackColor != Color.Transparent)
+                {
+                    return current.BackColor;
+                }
+
+                current = current.Parent;
+            }
+
+            return UiPalette.SidebarBackground;
+        }
+    }
+
+    internal static class GraphicsExtensions
+    {
+        public static void FillRoundedRectangle(this Graphics graphics, Brush brush, Rectangle bounds, int radius)
+        {
+            using (GraphicsPath path = UiGeometry.CreateRoundedRectangle(bounds, radius))
+            {
+                graphics.FillPath(brush, path);
+            }
         }
     }
 }

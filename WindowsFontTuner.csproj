@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
-    <Compile Include="MainForm.cs" />
+    <Compile Include="AppShellForm.cs" />
     <Compile Include="ModernControls.cs" />
     <Compile Include="FontPreset.cs" />
     <Compile Include="FontPackage.cs" />

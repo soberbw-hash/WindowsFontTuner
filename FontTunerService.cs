@@ -92,13 +92,25 @@ namespace WindowsFontTuner
                 throw new InvalidOperationException("未找到备份目录。");
             }
 
-            ImportRegistry(Path.Combine(latest.FullName, "Fonts.reg"));
-            ImportRegistry(Path.Combine(latest.FullName, "FontSubstitutes.reg"));
-            ImportRegistry(Path.Combine(latest.FullName, "Desktop.reg"));
-            ImportRegistry(Path.Combine(latest.FullName, "Avalon.Graphics.reg"));
-            ImportRegistry(Path.Combine(latest.FullName, "WindowMetrics.reg"));
-            RefreshSystemState(rebuildFontCache, restartExplorer);
+            RestoreBackup(latest.FullName, rebuildFontCache, restartExplorer);
             return latest.FullName;
+        }
+
+        public void RestoreBackup(string backupDirectory, bool rebuildFontCache, bool restartExplorer)
+        {
+            EnsureAdmin();
+
+            if (string.IsNullOrWhiteSpace(backupDirectory) || !Directory.Exists(backupDirectory))
+            {
+                throw new DirectoryNotFoundException("鏈壘鍒板浠界洰褰曪細" + backupDirectory);
+            }
+
+            ImportRegistry(Path.Combine(backupDirectory, "Fonts.reg"));
+            ImportRegistry(Path.Combine(backupDirectory, "FontSubstitutes.reg"));
+            ImportRegistry(Path.Combine(backupDirectory, "Desktop.reg"));
+            ImportRegistry(Path.Combine(backupDirectory, "Avalon.Graphics.reg"));
+            ImportRegistry(Path.Combine(backupDirectory, "WindowMetrics.reg"));
+            RefreshSystemState(rebuildFontCache, restartExplorer);
         }
 
         public void InstallFontPackage(string baseDirectory, FontPackage package)
