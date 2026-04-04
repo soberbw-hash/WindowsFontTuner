@@ -12,3 +12,7 @@ artifacts/
 dist/
 third_party/
 *.zip
+/WindowsFontTuner.exe
+/mscorlib.dll
+/norm*.nlp
+/zh-Hans/

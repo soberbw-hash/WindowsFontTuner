@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
@@ -11,160 +16,580 @@ namespace WindowsFontTuner
     public sealed class MainForm : Form
     {
         private readonly FontTunerService _service;
-        private readonly ComboBox _presetComboBox;
-        private readonly Label _descriptionLabel;
-        private readonly Label _fontHintLabel;
-        private readonly Label _packageInfoLabel;
-        private readonly Label _adminLabel;
-        private readonly CheckBox _rebuildCacheCheckBox;
-        private readonly CheckBox _restartExplorerCheckBox;
-        private readonly TextBox _logTextBox;
-        private readonly Button _installFontsButton;
+        private readonly UpdateService _updateService;
+        private ComboBox _presetComboBox;
+        private Label _descriptionLabel;
+        private Label _fontHintLabel;
+        private Label _packageInfoLabel;
+        private Label _adminLabel;
+        private Label _versionBadgeLabel;
+        private Label _updateStatusLabel;
+        private Label _heroSubtitleLabel;
+        private CheckBox _rebuildCacheCheckBox;
+        private CheckBox _restartExplorerCheckBox;
+        private TextBox _logTextBox;
+        private ModernButton _installFontsButton;
+        private ModernButton _openUpdateButton;
+        private ModernButton _checkUpdatesButton;
+        private ModernButton _openDownloadButton;
+        private ModernButton _clearLogButton;
+        private Label _quickPickLabel;
         private List<FontPreset> _presets;
         private Dictionary<string, FontPackage> _fontPackages;
+        private UpdateCheckResult _latestUpdateResult;
 
         public MainForm()
         {
             _service = new FontTunerService();
+            _updateService = new UpdateService();
             _presets = new List<FontPreset>();
             _fontPackages = new Dictionary<string, FontPackage>(StringComparer.OrdinalIgnoreCase);
 
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
+            DoubleBuffered = true;
+            AutoScaleMode = AutoScaleMode.Dpi;
             Text = "Windows字体调谐器";
-            Width = 960;
-            Height = 760;
-            MinimumSize = new Size(780, 600);
+            Width = 1120;
+            Height = 820;
+            MinimumSize = new Size(940, 680);
             StartPosition = FormStartPosition.CenterScreen;
+            BackColor = UiPalette.WindowBackground;
+            Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.25f, FontStyle.Regular);
 
-            TableLayoutPanel root = new TableLayoutPanel();
-            root.Dock = DockStyle.Fill;
-            root.Padding = new Padding(16);
-            root.ColumnCount = 1;
-            root.RowCount = 9;
-            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            root.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
-            Controls.Add(root);
+            TableLayoutPanel shell = new TableLayoutPanel();
+            shell.Dock = DockStyle.Fill;
+            shell.Padding = new Padding(24);
+            shell.BackColor = Color.Transparent;
+            shell.ColumnCount = 1;
+            shell.RowCount = 3;
+            shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 178f));
+            shell.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+            shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 224f));
+            Controls.Add(shell);
 
-            Label titleLabel = new Label();
-            titleLabel.AutoSize = true;
-            titleLabel.Font = new Font(Font, FontStyle.Bold);
-            titleLabel.Text = "开源可扩展的 Windows 字体调谐工具";
-            root.Controls.Add(titleLabel, 0, 0);
+            shell.Controls.Add(BuildHeroCard(), 0, 0);
+            shell.Controls.Add(BuildBodySection(), 0, 1);
+            shell.Controls.Add(BuildLogCard(), 0, 2);
 
-            _adminLabel = new Label();
-            _adminLabel.AutoSize = true;
-            _adminLabel.Margin = new Padding(0, 8, 0, 0);
-            root.Controls.Add(_adminLabel, 0, 1);
+            Load += MainForm_Load;
+            Shown += MainForm_Shown;
+        }
 
-            Panel presetPanel = new Panel();
-            presetPanel.Height = 36;
-            presetPanel.Dock = DockStyle.Top;
-            presetPanel.Margin = new Padding(0, 12, 0, 0);
-            root.Controls.Add(presetPanel, 0, 2);
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            TryApplyWindowEffects();
+        }
 
-            Label presetLabel = new Label();
-            presetLabel.Text = "预设：";
-            presetLabel.AutoSize = true;
-            presetLabel.Location = new Point(0, 10);
-            presetPanel.Controls.Add(presetLabel);
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            Rectangle bounds = ClientRectangle;
 
-            _presetComboBox = new ComboBox();
-            _presetComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            _presetComboBox.Width = 360;
-            _presetComboBox.Location = new Point(56, 6);
-            _presetComboBox.SelectedIndexChanged += PresetComboBox_SelectedIndexChanged;
-            presetPanel.Controls.Add(_presetComboBox);
+            using (LinearGradientBrush brush = new LinearGradientBrush(
+                bounds,
+                Color.FromArgb(242, 247, 252),
+                Color.FromArgb(232, 240, 249),
+                90f))
+            {
+                e.Graphics.FillRectangle(brush, bounds);
+            }
+
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            using (SolidBrush accentBrush = new SolidBrush(Color.FromArgb(28, 27, 108, 236)))
+            using (SolidBrush warmBrush = new SolidBrush(Color.FromArgb(20, 114, 197, 255)))
+            {
+                e.Graphics.FillEllipse(accentBrush, new Rectangle(Width - 300, -90, 360, 360));
+                e.Graphics.FillEllipse(warmBrush, new Rectangle(-140, Height - 280, 280, 280));
+            }
+        }
+
+        private Control BuildHeroCard()
+        {
+            ModernCardPanel hero = new ModernCardPanel();
+            hero.Dock = DockStyle.Fill;
+            hero.UseGradient = true;
+            hero.ShowGlow = true;
+            hero.CornerRadius = 34;
+            hero.Padding = new Padding(28, 24, 28, 24);
+            hero.Margin = new Padding(0, 0, 0, 18);
+
+            TableLayoutPanel layout = new TableLayoutPanel();
+            layout.Dock = DockStyle.Fill;
+            layout.BackColor = Color.Transparent;
+            layout.ColumnCount = 2;
+            layout.RowCount = 1;
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
+            hero.Controls.Add(layout);
+
+            Panel left = new Panel();
+            left.Dock = DockStyle.Fill;
+            left.BackColor = Color.Transparent;
+            layout.Controls.Add(left, 0, 0);
+
+            Label title = new Label();
+            title.AutoSize = true;
+            title.BackColor = Color.Transparent;
+            title.Font = new Font(Font.FontFamily, 20f, FontStyle.Bold);
+            title.ForeColor = UiPalette.TextPrimary;
+            title.Text = "把 Windows 字体调成更舒服的样子";
+            title.Location = new Point(0, 0);
+            left.Controls.Add(title);
+
+            _heroSubtitleLabel = new Label();
+            _heroSubtitleLabel.AutoSize = false;
+            _heroSubtitleLabel.BackColor = Color.Transparent;
+            _heroSubtitleLabel.ForeColor = UiPalette.TextSecondary;
+            _heroSubtitleLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Regular);
+            _heroSubtitleLabel.Location = new Point(0, 46);
+            _heroSubtitleLabel.Size = new Size(520, 76);
+            _heroSubtitleLabel.Text =
+                "内置三套可直接安装的字体包，也支持一键备份、恢复、应用预设。" + Environment.NewLine +
+                "这一版还加了更圆润的界面和本地检查更新，别人装完软件后也能看到新版本提示。";
+            left.Controls.Add(_heroSubtitleLabel);
+
+            _versionBadgeLabel = new Label();
+            _versionBadgeLabel.AutoSize = true;
+            _versionBadgeLabel.BackColor = UiPalette.AccentSoft;
+            _versionBadgeLabel.ForeColor = UiPalette.Accent;
+            _versionBadgeLabel.Font = new Font(Font.FontFamily, 9f, FontStyle.Bold);
+            _versionBadgeLabel.Padding = new Padding(12, 6, 12, 6);
+            _versionBadgeLabel.Location = new Point(0, 126);
+            left.Controls.Add(_versionBadgeLabel);
+
+            Panel right = new Panel();
+            right.Dock = DockStyle.Fill;
+            right.BackColor = Color.Transparent;
+            layout.Controls.Add(right, 1, 0);
+
+            Label updateTitle = new Label();
+            updateTitle.AutoSize = true;
+            updateTitle.BackColor = Color.Transparent;
+            updateTitle.Font = new Font(Font.FontFamily, 10.5f, FontStyle.Bold);
+            updateTitle.ForeColor = UiPalette.TextPrimary;
+            updateTitle.Text = "版本与更新";
+            updateTitle.Location = new Point(0, 2);
+            right.Controls.Add(updateTitle);
+
+            _updateStatusLabel = new Label();
+            _updateStatusLabel.AutoSize = false;
+            _updateStatusLabel.BackColor = Color.Transparent;
+            _updateStatusLabel.ForeColor = UiPalette.TextSecondary;
+            _updateStatusLabel.Location = new Point(0, 34);
+            _updateStatusLabel.Size = new Size(360, 56);
+            _updateStatusLabel.Text = "启动后会自动检查 GitHub Release，也可以手动点按钮立即检查。";
+            right.Controls.Add(_updateStatusLabel);
 
             FlowLayoutPanel actions = new FlowLayoutPanel();
             actions.AutoSize = true;
+            actions.BackColor = Color.Transparent;
             actions.WrapContents = true;
-            actions.Margin = new Padding(0, 12, 0, 0);
-            root.Controls.Add(actions, 0, 3);
+            actions.Location = new Point(0, 98);
+            right.Controls.Add(actions);
 
-            actions.Controls.Add(BuildButton("应用当前预设", ApplyButton_Click));
-            _installFontsButton = BuildButton("安装预设字体", InstallFontsButton_Click);
+            _checkUpdatesButton = BuildButton("检查更新", CheckUpdatesButton_Click, ModernButtonStyle.Primary, 126);
+            actions.Controls.Add(_checkUpdatesButton);
+
+            _openUpdateButton = BuildButton("打开项目主页", OpenUpdatePageButton_Click, ModernButtonStyle.Secondary, 138);
+            actions.Controls.Add(_openUpdateButton);
+
+            _openDownloadButton = BuildButton("下载新版本", OpenDownloadButton_Click, ModernButtonStyle.Secondary, 138);
+            _openDownloadButton.Visible = false;
+            actions.Controls.Add(_openDownloadButton);
+
+            return hero;
+        }
+
+        private Control BuildBodySection()
+        {
+            TableLayoutPanel body = new TableLayoutPanel();
+            body.Dock = DockStyle.Fill;
+            body.BackColor = Color.Transparent;
+            body.ColumnCount = 2;
+            body.RowCount = 1;
+            body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
+            body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
+            body.Margin = new Padding(0, 0, 0, 18);
+
+            body.Controls.Add(BuildPresetCard(), 0, 0);
+            body.Controls.Add(BuildStatusCard(), 1, 0);
+
+            return body;
+        }
+
+        private Control BuildPresetCard()
+        {
+            ModernCardPanel card = new ModernCardPanel();
+            card.Dock = DockStyle.Fill;
+            card.CornerRadius = 28;
+            card.Padding = new Padding(22);
+            card.Margin = new Padding(0, 0, 10, 0);
+
+            TableLayoutPanel layout = new TableLayoutPanel();
+            layout.Dock = DockStyle.Fill;
+            layout.BackColor = Color.Transparent;
+            layout.ColumnCount = 1;
+            layout.RowCount = 6;
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+            card.Controls.Add(layout);
+
+            Label title = new Label();
+            title.AutoSize = true;
+            title.BackColor = Color.Transparent;
+            title.Font = new Font(Font.FontFamily, 12.5f, FontStyle.Bold);
+            title.ForeColor = UiPalette.TextPrimary;
+            title.Text = "预设与操作";
+            layout.Controls.Add(title, 0, 0);
+
+            Label sub = new Label();
+            sub.AutoSize = true;
+            sub.BackColor = Color.Transparent;
+            sub.Margin = new Padding(0, 6, 0, 0);
+            sub.ForeColor = UiPalette.TextMuted;
+            sub.Text = "建议顺序：先安装字体，再应用预设。";
+            layout.Controls.Add(sub, 0, 1);
+
+            Panel pickerRow = new Panel();
+            pickerRow.Height = 52;
+            pickerRow.Dock = DockStyle.Top;
+            pickerRow.BackColor = Color.Transparent;
+            pickerRow.Margin = new Padding(0, 18, 0, 0);
+            layout.Controls.Add(pickerRow, 0, 2);
+
+            Label presetLabel = new Label();
+            presetLabel.AutoSize = true;
+            presetLabel.BackColor = Color.Transparent;
+            presetLabel.Text = "预设";
+            presetLabel.ForeColor = UiPalette.TextSecondary;
+            presetLabel.Location = new Point(0, 14);
+            pickerRow.Controls.Add(presetLabel);
+
+            _presetComboBox = new ComboBox();
+            _presetComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _presetComboBox.FlatStyle = FlatStyle.Flat;
+            _presetComboBox.Width = 340;
+            _presetComboBox.Height = 32;
+            _presetComboBox.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
+            _presetComboBox.Location = new Point(58, 9);
+            _presetComboBox.SelectedIndexChanged += PresetComboBox_SelectedIndexChanged;
+            pickerRow.Controls.Add(_presetComboBox);
+
+            FlowLayoutPanel actions = new FlowLayoutPanel();
+            actions.AutoSize = true;
+            actions.BackColor = Color.Transparent;
+            actions.WrapContents = true;
+            actions.Margin = new Padding(0, 10, 0, 0);
+            layout.Controls.Add(actions, 0, 3);
+
+            actions.Controls.Add(BuildButton("应用当前预设", ApplyButton_Click, ModernButtonStyle.Primary, 138));
+            _installFontsButton = BuildButton("安装预设字体", InstallFontsButton_Click, ModernButtonStyle.Secondary, 138);
             actions.Controls.Add(_installFontsButton);
-            actions.Controls.Add(BuildButton("创建备份", BackupButton_Click));
-            actions.Controls.Add(BuildButton("恢复最近备份", RestoreButton_Click));
-            actions.Controls.Add(BuildButton("打开备份目录", OpenBackupsButton_Click));
-            actions.Controls.Add(BuildButton("打开预设目录", OpenPresetsButton_Click));
-            actions.Controls.Add(BuildButton("打开字体包目录", OpenFontPackagesButton_Click));
+            actions.Controls.Add(BuildButton("创建备份", BackupButton_Click, ModernButtonStyle.Secondary, 116));
+            actions.Controls.Add(BuildButton("恢复最近备份", RestoreButton_Click, ModernButtonStyle.Secondary, 142));
+            actions.Controls.Add(BuildButton("打开备份目录", OpenBackupsButton_Click, ModernButtonStyle.Ghost, 128));
+            actions.Controls.Add(BuildButton("打开预设目录", OpenPresetsButton_Click, ModernButtonStyle.Ghost, 128));
 
-            FlowLayoutPanel optionsPanel = new FlowLayoutPanel();
-            optionsPanel.AutoSize = true;
-            optionsPanel.WrapContents = true;
-            optionsPanel.Margin = new Padding(0, 12, 0, 0);
-            root.Controls.Add(optionsPanel, 0, 4);
+            ModernCardPanel descriptionCard = new ModernCardPanel();
+            descriptionCard.Dock = DockStyle.Top;
+            descriptionCard.CornerRadius = 22;
+            descriptionCard.FillColor = UiPalette.Secondary;
+            descriptionCard.BorderColor = Color.FromArgb(224, 231, 241);
+            descriptionCard.Padding = new Padding(16);
+            descriptionCard.Margin = new Padding(0, 16, 0, 0);
+            descriptionCard.Height = 132;
+            layout.Controls.Add(descriptionCard, 0, 4);
 
-            _rebuildCacheCheckBox = new CheckBox();
-            _rebuildCacheCheckBox.Text = "重建字体缓存";
-            _rebuildCacheCheckBox.Checked = true;
-            _rebuildCacheCheckBox.AutoSize = true;
-            optionsPanel.Controls.Add(_rebuildCacheCheckBox);
-
-            _restartExplorerCheckBox = new CheckBox();
-            _restartExplorerCheckBox.Text = "应用后重启资源管理器";
-            _restartExplorerCheckBox.Checked = true;
-            _restartExplorerCheckBox.AutoSize = true;
-            optionsPanel.Controls.Add(_restartExplorerCheckBox);
+            Label descriptionTitle = new Label();
+            descriptionTitle.AutoSize = true;
+            descriptionTitle.BackColor = Color.Transparent;
+            descriptionTitle.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
+            descriptionTitle.ForeColor = UiPalette.TextPrimary;
+            descriptionTitle.Text = "当前预设说明";
+            descriptionTitle.Location = new Point(16, 14);
+            descriptionCard.Controls.Add(descriptionTitle);
 
             _descriptionLabel = new Label();
-            _descriptionLabel.AutoSize = true;
-            _descriptionLabel.MaximumSize = new Size(900, 0);
-            _descriptionLabel.Margin = new Padding(0, 12, 0, 0);
-            root.Controls.Add(_descriptionLabel, 0, 5);
+            _descriptionLabel.AutoSize = false;
+            _descriptionLabel.BackColor = Color.Transparent;
+            _descriptionLabel.ForeColor = UiPalette.TextSecondary;
+            _descriptionLabel.Location = new Point(16, 40);
+            _descriptionLabel.Size = new Size(520, 72);
+            _descriptionLabel.Text = "加载中...";
+            descriptionCard.Controls.Add(_descriptionLabel);
+
+            ModernCardPanel quickPickCard = new ModernCardPanel();
+            quickPickCard.Dock = DockStyle.Fill;
+            quickPickCard.CornerRadius = 22;
+            quickPickCard.FillColor = Color.FromArgb(228, 246, 242, 249);
+            quickPickCard.BorderColor = Color.FromArgb(222, 231, 240);
+            quickPickCard.Padding = new Padding(16);
+            quickPickCard.Margin = new Padding(0, 16, 0, 0);
+            layout.Controls.Add(quickPickCard, 0, 5);
+
+            Label quickPickTitle = new Label();
+            quickPickTitle.AutoSize = true;
+            quickPickTitle.BackColor = Color.Transparent;
+            quickPickTitle.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
+            quickPickTitle.ForeColor = UiPalette.TextPrimary;
+            quickPickTitle.Text = "快速建议";
+            quickPickTitle.Location = new Point(16, 14);
+            quickPickCard.Controls.Add(quickPickTitle);
+
+            _quickPickLabel = new Label();
+            _quickPickLabel.AutoSize = false;
+            _quickPickLabel.BackColor = Color.Transparent;
+            _quickPickLabel.ForeColor = UiPalette.TextSecondary;
+            _quickPickLabel.Location = new Point(16, 40);
+            _quickPickLabel.Size = new Size(520, 92);
+            _quickPickLabel.Text =
+                "HarmonyOS：整体更现代，适合想要统一感的人。" + Environment.NewLine +
+                "思源黑体：最稳妥，适合作为长期默认方案。" + Environment.NewLine +
+                "更纱 UI：更有存在感，适合觉得 Windows 默认太细的人。";
+            quickPickCard.Controls.Add(_quickPickLabel);
+
+            return card;
+        }
+
+        private Control BuildStatusCard()
+        {
+            ModernCardPanel card = new ModernCardPanel();
+            card.Dock = DockStyle.Fill;
+            card.CornerRadius = 28;
+            card.Padding = new Padding(22);
+            card.Margin = new Padding(10, 0, 0, 0);
+
+            TableLayoutPanel layout = new TableLayoutPanel();
+            layout.Dock = DockStyle.Fill;
+            layout.BackColor = Color.Transparent;
+            layout.ColumnCount = 1;
+            layout.RowCount = 6;
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            card.Controls.Add(layout);
+
+            Label title = new Label();
+            title.AutoSize = true;
+            title.BackColor = Color.Transparent;
+            title.Font = new Font(Font.FontFamily, 12.5f, FontStyle.Bold);
+            title.ForeColor = UiPalette.TextPrimary;
+            title.Text = "状态与资源";
+            layout.Controls.Add(title, 0, 0);
+
+            _adminLabel = new Label();
+            _adminLabel.AutoSize = true;
+            _adminLabel.BackColor = Color.Transparent;
+            _adminLabel.Font = new Font(Font.FontFamily, 9.5f, FontStyle.Bold);
+            _adminLabel.Margin = new Padding(0, 10, 0, 0);
+            layout.Controls.Add(_adminLabel, 0, 1);
+
+            FlowLayoutPanel options = new FlowLayoutPanel();
+            options.AutoSize = true;
+            options.BackColor = Color.Transparent;
+            options.WrapContents = true;
+            options.Margin = new Padding(0, 14, 0, 0);
+            layout.Controls.Add(options, 0, 2);
+
+            _rebuildCacheCheckBox = new CheckBox();
+            _rebuildCacheCheckBox.AutoSize = true;
+            _rebuildCacheCheckBox.BackColor = Color.Transparent;
+            _rebuildCacheCheckBox.Checked = true;
+            _rebuildCacheCheckBox.ForeColor = UiPalette.TextSecondary;
+            _rebuildCacheCheckBox.Text = "重建字体缓存";
+            options.Controls.Add(_rebuildCacheCheckBox);
+
+            _restartExplorerCheckBox = new CheckBox();
+            _restartExplorerCheckBox.AutoSize = true;
+            _restartExplorerCheckBox.BackColor = Color.Transparent;
+            _restartExplorerCheckBox.Checked = true;
+            _restartExplorerCheckBox.ForeColor = UiPalette.TextSecondary;
+            _restartExplorerCheckBox.Text = "应用后重启资源管理器";
+            options.Controls.Add(_restartExplorerCheckBox);
+
+            ModernCardPanel fontCard = new ModernCardPanel();
+            fontCard.Dock = DockStyle.Top;
+            fontCard.CornerRadius = 22;
+            fontCard.FillColor = UiPalette.Secondary;
+            fontCard.BorderColor = Color.FromArgb(224, 231, 241);
+            fontCard.Padding = new Padding(16);
+            fontCard.Margin = new Padding(0, 16, 0, 0);
+            fontCard.Height = 100;
+            layout.Controls.Add(fontCard, 0, 3);
+
+            Label fontTitle = new Label();
+            fontTitle.AutoSize = true;
+            fontTitle.BackColor = Color.Transparent;
+            fontTitle.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
+            fontTitle.ForeColor = UiPalette.TextPrimary;
+            fontTitle.Text = "字体状态";
+            fontTitle.Location = new Point(16, 14);
+            fontCard.Controls.Add(fontTitle);
 
             _fontHintLabel = new Label();
-            _fontHintLabel.AutoSize = true;
-            _fontHintLabel.MaximumSize = new Size(900, 0);
-            _fontHintLabel.Margin = new Padding(0, 8, 0, 0);
-            root.Controls.Add(_fontHintLabel, 0, 6);
+            _fontHintLabel.AutoSize = false;
+            _fontHintLabel.BackColor = Color.Transparent;
+            _fontHintLabel.ForeColor = UiPalette.TextSecondary;
+            _fontHintLabel.Location = new Point(16, 40);
+            _fontHintLabel.Size = new Size(360, 42);
+            fontCard.Controls.Add(_fontHintLabel);
+
+            ModernCardPanel packageCard = new ModernCardPanel();
+            packageCard.Dock = DockStyle.Fill;
+            packageCard.CornerRadius = 22;
+            packageCard.FillColor = UiPalette.Secondary;
+            packageCard.BorderColor = Color.FromArgb(224, 231, 241);
+            packageCard.Padding = new Padding(16);
+            packageCard.Margin = new Padding(0, 16, 0, 0);
+            layout.Controls.Add(packageCard, 0, 4);
+
+            Label packageTitle = new Label();
+            packageTitle.AutoSize = true;
+            packageTitle.BackColor = Color.Transparent;
+            packageTitle.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
+            packageTitle.ForeColor = UiPalette.TextPrimary;
+            packageTitle.Text = "内置字体包";
+            packageTitle.Location = new Point(16, 14);
+            packageCard.Controls.Add(packageTitle);
 
             _packageInfoLabel = new Label();
-            _packageInfoLabel.AutoSize = true;
-            _packageInfoLabel.MaximumSize = new Size(900, 0);
-            _packageInfoLabel.Margin = new Padding(0, 8, 0, 0);
-            root.Controls.Add(_packageInfoLabel, 0, 7);
+            _packageInfoLabel.AutoSize = false;
+            _packageInfoLabel.BackColor = Color.Transparent;
+            _packageInfoLabel.ForeColor = UiPalette.TextSecondary;
+            _packageInfoLabel.Location = new Point(16, 40);
+            _packageInfoLabel.Size = new Size(360, 188);
+            packageCard.Controls.Add(_packageInfoLabel);
+
+            FlowLayoutPanel resourceActions = new FlowLayoutPanel();
+            resourceActions.AutoSize = true;
+            resourceActions.BackColor = Color.Transparent;
+            resourceActions.WrapContents = true;
+            resourceActions.Margin = new Padding(0, 16, 0, 0);
+            layout.Controls.Add(resourceActions, 0, 5);
+
+            resourceActions.Controls.Add(BuildButton("打开字体包目录", OpenFontPackagesButton_Click, ModernButtonStyle.Ghost, 132));
+            resourceActions.Controls.Add(BuildButton("查看 GitHub Release", OpenReleasePageButton_Click, ModernButtonStyle.Ghost, 150));
+
+            return card;
+        }
+
+        private Control BuildLogCard()
+        {
+            ModernCardPanel card = new ModernCardPanel();
+            card.Dock = DockStyle.Fill;
+            card.CornerRadius = 28;
+            card.Padding = new Padding(22);
+            card.Margin = new Padding(0);
+
+            TableLayoutPanel layout = new TableLayoutPanel();
+            layout.Dock = DockStyle.Fill;
+            layout.BackColor = Color.Transparent;
+            layout.ColumnCount = 1;
+            layout.RowCount = 2;
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+            card.Controls.Add(layout);
+
+            TableLayoutPanel header = new TableLayoutPanel();
+            header.Dock = DockStyle.Top;
+            header.BackColor = Color.Transparent;
+            header.ColumnCount = 2;
+            header.RowCount = 1;
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            layout.Controls.Add(header, 0, 0);
+
+            Panel titles = new Panel();
+            titles.Dock = DockStyle.Fill;
+            titles.BackColor = Color.Transparent;
+            header.Controls.Add(titles, 0, 0);
+
+            Label title = new Label();
+            title.AutoSize = true;
+            title.BackColor = Color.Transparent;
+            title.Font = new Font(Font.FontFamily, 12.5f, FontStyle.Bold);
+            title.ForeColor = UiPalette.TextPrimary;
+            title.Text = "操作日志";
+            title.Location = new Point(0, 0);
+            titles.Controls.Add(title);
+
+            Label sub = new Label();
+            sub.AutoSize = true;
+            sub.BackColor = Color.Transparent;
+            sub.ForeColor = UiPalette.TextMuted;
+            sub.Location = new Point(0, 28);
+            sub.Text = "备份、安装、应用预设和更新检查的结果都会在这里显示。";
+            titles.Controls.Add(sub);
+
+            _clearLogButton = BuildButton("清空日志", ClearLogButton_Click, ModernButtonStyle.Ghost, 104);
+            _clearLogButton.Margin = new Padding(0);
+            header.Controls.Add(_clearLogButton, 1, 0);
+
+            ModernCardPanel logSurface = new ModernCardPanel();
+            logSurface.Dock = DockStyle.Fill;
+            logSurface.CornerRadius = 22;
+            logSurface.FillColor = Color.FromArgb(242, 248, 252);
+            logSurface.BorderColor = Color.FromArgb(224, 231, 241);
+            logSurface.Padding = new Padding(14);
+            logSurface.Margin = new Padding(0, 16, 0, 0);
+            layout.Controls.Add(logSurface, 0, 1);
 
             _logTextBox = new TextBox();
             _logTextBox.Multiline = true;
             _logTextBox.ScrollBars = ScrollBars.Vertical;
-            _logTextBox.Dock = DockStyle.Fill;
-            _logTextBox.Margin = new Padding(0, 12, 0, 0);
             _logTextBox.ReadOnly = true;
-            _logTextBox.BackColor = Color.White;
-            root.Controls.Add(_logTextBox, 0, 8);
+            _logTextBox.BorderStyle = BorderStyle.None;
+            _logTextBox.Dock = DockStyle.Fill;
+            _logTextBox.BackColor = Color.FromArgb(242, 248, 252);
+            _logTextBox.ForeColor = UiPalette.TextPrimary;
+            _logTextBox.Font = new Font("Consolas", 9.4f, FontStyle.Regular);
+            logSurface.Controls.Add(_logTextBox);
 
-            Load += MainForm_Load;
+            return card;
         }
 
-        private static Button BuildButton(string text, EventHandler onClick)
+        private static ModernButton BuildButton(string text, EventHandler onClick, ModernButtonStyle style, int width)
         {
-            Button button = new Button();
+            ModernButton button = new ModernButton();
             button.Text = text;
-            button.AutoSize = true;
-            button.Padding = new Padding(10, 4, 10, 4);
+            button.Width = width;
+            button.ButtonStyle = style;
+            button.CornerRadius = 14;
+            button.Margin = new Padding(0, 0, 10, 10);
             button.Click += onClick;
             return button;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            _adminLabel.Text = _service.IsAdministrator()
-                ? "管理员模式：已启用"
-                : "管理员模式：未启用。应用修改前请右键以管理员身份运行。";
+            bool isAdmin = _service.IsAdministrator();
+            _adminLabel.Text = isAdmin
+                ? "管理员模式已启用，可以直接备份、应用和恢复系统字体设置。"
+                : "当前不是管理员模式。要真正写入系统字体设置，请右键“以管理员身份运行”。";
+            _adminLabel.ForeColor = isAdmin ? UiPalette.Success : UiPalette.Warning;
+
+            _versionBadgeLabel.Text = "当前版本 v" + FormatVersion(GetCurrentVersion());
 
             LoadFontPackages();
             LoadPresets();
+            RefreshPresetDetails();
+
             Log("备份目录：" + _service.BackupRoot);
-            Log("当前版本内置三套字体包，可先安装字体，再应用预设。");
-            Log("说明：恢复最近备份会回退字体映射与渲染参数，但不会自动卸载已经安装的字体文件。");
+            Log("当前版本已内置三套字体包，可先安装字体，再应用预设。");
+            Log("启动后会自动检查 GitHub Release，用户也可以手动点“检查更新”。");
+        }
+
+        private async void MainForm_Shown(object sender, EventArgs e)
+        {
+            await CheckForUpdatesAsync(true);
         }
 
         private void LoadFontPackages()
@@ -194,6 +619,11 @@ namespace WindowsFontTuner
                 foreach (string file in Directory.GetFiles(presetDirectory, "*.json"))
                 {
                     FontPreset preset = serializer.Deserialize<FontPreset>(File.ReadAllText(file));
+                    if (preset == null)
+                    {
+                        continue;
+                    }
+
                     preset.SourcePath = file;
                     presets.Add(preset);
                 }
@@ -242,23 +672,25 @@ namespace WindowsFontTuner
 
             if (preset == null)
             {
-                _descriptionLabel.Text = "未选择预设。";
-                _fontHintLabel.Text = string.Empty;
-                _packageInfoLabel.Text = string.Empty;
+                _descriptionLabel.Text = "还没有读取到任何预设。";
+                _fontHintLabel.Text = "未选择预设。";
+                _packageInfoLabel.Text = "暂无内置字体包信息。";
                 _installFontsButton.Enabled = false;
                 return;
             }
 
-            _descriptionLabel.Text = preset.Description ?? string.Empty;
+            _descriptionLabel.Text = string.IsNullOrWhiteSpace(preset.Description)
+                ? "这个预设暂时没有额外说明。"
+                : preset.Description;
 
             IList<string> missing = _service.GetMissingFonts(preset);
             if (missing.Count == 0)
             {
-                _fontHintLabel.Text = "已检测到所需字体：" + string.Join(", ", preset.RequiredFonts ?? new List<string>());
+                _fontHintLabel.Text = "所需字体已就绪：" + string.Join("、", preset.RequiredFonts ?? new List<string>());
             }
             else
             {
-                _fontHintLabel.Text = "缺少所需字体：" + string.Join(", ", missing);
+                _fontHintLabel.Text = "还缺这些字体：" + string.Join("、", missing);
             }
 
             FontPackage package = GetSelectedFontPackage();
@@ -270,11 +702,168 @@ namespace WindowsFontTuner
             }
 
             _installFontsButton.Enabled = true;
+            _installFontsButton.Text = "安装 " + package.Name;
             _packageInfoLabel.Text =
-                "内置字体包：" + package.Name + Environment.NewLine +
-                "适合人群：" + (package.RecommendedFor ?? "未提供说明") + Environment.NewLine +
-                "授权方式：" + (package.LicenseName ?? "未提供") + Environment.NewLine +
-                "字体来源：" + (package.SourceUrl ?? "未提供");
+                package.Name + Environment.NewLine +
+                (string.IsNullOrWhiteSpace(package.Description) ? "未提供说明" : package.Description) + Environment.NewLine + Environment.NewLine +
+                "适合人群：" + (string.IsNullOrWhiteSpace(package.RecommendedFor) ? "未提供说明" : package.RecommendedFor) + Environment.NewLine +
+                "授权方式：" + (string.IsNullOrWhiteSpace(package.LicenseName) ? "未提供" : package.LicenseName) + Environment.NewLine +
+                "字体来源：" + (string.IsNullOrWhiteSpace(package.SourceUrl) ? "未提供" : package.SourceUrl);
+        }
+
+        private async Task CheckForUpdatesAsync(bool silent)
+        {
+            Version currentVersion = GetCurrentVersion();
+            _checkUpdatesButton.Enabled = false;
+            _updateStatusLabel.Text = "正在检查 GitHub Release，请稍等...";
+            _updateStatusLabel.ForeColor = UiPalette.TextSecondary;
+
+            Log("开始检查更新。");
+
+            try
+            {
+                UpdateCheckResult result = await Task.Run(delegate
+                {
+                    return _updateService.CheckForUpdates(currentVersion);
+                });
+
+                _latestUpdateResult = result;
+                ApplyUpdateStatus(result);
+
+                if (result != null && result.IsUpdateAvailable)
+                {
+                    Log("发现新版本：" + result.LatestTag);
+
+                    if (!silent)
+                    {
+                        string message =
+                            "发现新版本 " + FormatVersion(result.LatestVersion) +
+                            (string.IsNullOrWhiteSpace(result.ReleaseName) ? string.Empty : "（" + result.ReleaseName + "）") +
+                            "。要现在打开下载页吗？";
+
+                        if (MessageBox.Show(this, message, "发现更新", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                        {
+                            OpenUrl(string.IsNullOrWhiteSpace(result.DownloadUrl) ? result.ReleaseUrl : result.DownloadUrl);
+                        }
+                    }
+                }
+                else if (!silent)
+                {
+                    MessageBox.Show(this, "当前已经是最新版本。", "检查更新", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                _updateStatusLabel.Text = "更新检查失败，可以稍后重试。";
+                _updateStatusLabel.ForeColor = UiPalette.Warning;
+                Log("检查更新失败：" + ex.Message);
+
+                if (!silent)
+                {
+                    MessageBox.Show(
+                        this,
+                        "检查更新失败：" + ex.Message,
+                        "检查更新",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+            }
+            finally
+            {
+                _checkUpdatesButton.Enabled = true;
+            }
+        }
+
+        private void ApplyUpdateStatus(UpdateCheckResult result)
+        {
+            if (result == null)
+            {
+                _updateStatusLabel.Text = "暂时没有拿到版本信息。";
+                _updateStatusLabel.ForeColor = UiPalette.TextSecondary;
+                _openDownloadButton.Visible = false;
+                return;
+            }
+
+            if (result.IsUpdateAvailable)
+            {
+                string published = result.PublishedAt.HasValue
+                    ? "，发布于 " + result.PublishedAt.Value.ToLocalTime().ToString("yyyy-MM-dd")
+                    : string.Empty;
+
+                string summary = GetReleaseSummary(result.ReleaseBody);
+                _updateStatusLabel.ForeColor = UiPalette.Accent;
+                _updateStatusLabel.Text =
+                    "发现新版本 v" + FormatVersion(result.LatestVersion) + published +
+                    (string.IsNullOrWhiteSpace(summary) ? string.Empty : Environment.NewLine + summary);
+                _openDownloadButton.Visible = true;
+                _openDownloadButton.Text = "下载 " + (string.IsNullOrWhiteSpace(result.LatestTag) ? "新版本" : result.LatestTag);
+                _openUpdateButton.Text = "查看更新说明";
+                return;
+            }
+
+            _updateStatusLabel.ForeColor = UiPalette.Success;
+            _updateStatusLabel.Text = "当前已是最新版本 v" + FormatVersion(result.CurrentVersion) + "。";
+            _openDownloadButton.Visible = false;
+            _openUpdateButton.Text = "打开项目主页";
+        }
+
+        private static string GetReleaseSummary(string body)
+        {
+            if (string.IsNullOrWhiteSpace(body))
+            {
+                return string.Empty;
+            }
+
+            foreach (string line in body.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                string trimmed = line.Trim();
+                if (trimmed.Length == 0)
+                {
+                    continue;
+                }
+
+                if (trimmed.StartsWith("#", StringComparison.Ordinal) || trimmed.StartsWith("-", StringComparison.Ordinal))
+                {
+                    trimmed = trimmed.TrimStart('#', '-', ' ', '\t');
+                }
+
+                if (trimmed.Length > 58)
+                {
+                    trimmed = trimmed.Substring(0, 58) + "...";
+                }
+
+                return trimmed;
+            }
+
+            return string.Empty;
+        }
+
+        private async void CheckUpdatesButton_Click(object sender, EventArgs e)
+        {
+            await CheckForUpdatesAsync(false);
+        }
+
+        private void OpenUpdatePageButton_Click(object sender, EventArgs e)
+        {
+            string url = _latestUpdateResult != null && !string.IsNullOrWhiteSpace(_latestUpdateResult.ReleaseUrl)
+                ? _latestUpdateResult.ReleaseUrl
+                : UpdateService.RepositoryPage;
+
+            OpenUrl(url);
+        }
+
+        private void OpenDownloadButton_Click(object sender, EventArgs e)
+        {
+            string url = _latestUpdateResult != null && !string.IsNullOrWhiteSpace(_latestUpdateResult.DownloadUrl)
+                ? _latestUpdateResult.DownloadUrl
+                : (_latestUpdateResult == null ? UpdateService.LatestReleasePage : _latestUpdateResult.ReleaseUrl);
+
+            OpenUrl(url);
+        }
+
+        private void OpenReleasePageButton_Click(object sender, EventArgs e)
+        {
+            OpenUrl(UpdateService.LatestReleasePage);
         }
 
         private void InstallFontsButton_Click(object sender, EventArgs e)
@@ -283,7 +872,7 @@ namespace WindowsFontTuner
 
             if (package == null)
             {
-                MessageBox.Show(this, "当前预设没有可安装的字体包。", "Windows字体调谐器", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(this, "当前预设没有可安装的字体包。", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -301,7 +890,7 @@ namespace WindowsFontTuner
 
             if (preset == null)
             {
-                MessageBox.Show(this, "请先选择一个预设。", "Windows字体调谐器", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(this, "请先选择一个预设。", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -315,8 +904,13 @@ namespace WindowsFontTuner
                 {
                     DialogResult choice = MessageBox.Show(
                         this,
-                        "检测到以下字体未安装：\r\n\r\n" + string.Join("\r\n", missing) +
-                        "\r\n\r\n是否先安装软件内置的字体包再继续？\r\n\r\n是：先安装字体并继续\r\n否：直接继续\r\n取消：返回",
+                        "检测到以下字体未安装：" + Environment.NewLine + Environment.NewLine +
+                        string.Join(Environment.NewLine, missing) +
+                        Environment.NewLine + Environment.NewLine +
+                        "是否先安装软件内置的字体包再继续？" + Environment.NewLine + Environment.NewLine +
+                        "是：先安装字体并继续" + Environment.NewLine +
+                        "否：直接继续" + Environment.NewLine +
+                        "取消：返回",
                         "缺少字体",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Warning);
@@ -332,7 +926,10 @@ namespace WindowsFontTuner
                 {
                     DialogResult proceed = MessageBox.Show(
                         this,
-                        "检测到以下字体未安装：\r\n\r\n" + string.Join("\r\n", missing) + "\r\n\r\n仍然继续吗？",
+                        "检测到以下字体未安装：" + Environment.NewLine + Environment.NewLine +
+                        string.Join(Environment.NewLine, missing) +
+                        Environment.NewLine + Environment.NewLine +
+                        "仍然继续吗？",
                         "缺少字体",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Warning);
@@ -412,13 +1009,19 @@ namespace WindowsFontTuner
             _service.OpenDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FontPackages"));
         }
 
+        private void ClearLogButton_Click(object sender, EventArgs e)
+        {
+            _logTextBox.Clear();
+        }
+
         private void RunAction(string actionName, Action action)
         {
-            Cursor previous = Cursor.Current;
+            Cursor previousCursor = Cursor.Current;
 
             try
             {
                 Cursor.Current = Cursors.WaitCursor;
+                UseWaitCursor = true;
                 Enabled = false;
                 Application.DoEvents();
                 action();
@@ -432,14 +1035,100 @@ namespace WindowsFontTuner
             finally
             {
                 Enabled = true;
-                Cursor.Current = previous;
+                UseWaitCursor = false;
+                Cursor.Current = previousCursor;
             }
+        }
+
+        private static void OpenUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+
+        private static Version GetCurrentVersion()
+        {
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            return version ?? new Version(0, 0, 0, 0);
+        }
+
+        private static string FormatVersion(Version version)
+        {
+            if (version == null)
+            {
+                return "0.0.0";
+            }
+
+            if (version.Revision > 0)
+            {
+                return version.ToString(4);
+            }
+
+            if (version.Build > 0)
+            {
+                return version.ToString(3);
+            }
+
+            return version.ToString(2);
         }
 
         private void Log(string message)
         {
+            if (_logTextBox == null)
+            {
+                return;
+            }
+
             string line = DateTime.Now.ToString("HH:mm:ss") + "  " + message;
             _logTextBox.AppendText(line + Environment.NewLine);
+        }
+
+        private void TryApplyWindowEffects()
+        {
+            try
+            {
+                int cornerPreference = NativeMethods.DWMWCP_ROUND;
+                NativeMethods.DwmSetWindowAttribute(
+                    Handle,
+                    NativeMethods.DWMWA_WINDOW_CORNER_PREFERENCE,
+                    ref cornerPreference,
+                    Marshal.SizeOf(typeof(int)));
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                int backdrop = NativeMethods.DWMSBT_TRANSIENTWINDOW;
+                NativeMethods.DwmSetWindowAttribute(
+                    Handle,
+                    NativeMethods.DWMWA_SYSTEMBACKDROP_TYPE,
+                    ref backdrop,
+                    Marshal.SizeOf(typeof(int)));
+            }
+            catch
+            {
+            }
+        }
+
+        private static class NativeMethods
+        {
+            public const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+            public const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+            public const int DWMWCP_ROUND = 2;
+            public const int DWMSBT_TRANSIENTWINDOW = 3;
+
+            [DllImport("dwmapi.dll")]
+            public static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
         }
     }
 }
