@@ -1,6 +1,7 @@
 {
   "Name": "HarmonyOS 统一预设",
-  "Description": "备份当前 Windows 字体相关注册表项，将 Segoe UI 和 Segoe UI Variable 系列别名切换到 HarmonyOS Sans SC / HarmonyOS Sans SC Medium，应用灰阶渲染参数，并把传统桌面图标、菜单和窗口字体更新为 HarmonyOS Sans SC 550 字重。",
+  "Description": "当前默认推荐方案。整体观感现代、干净，和这台机器现在调出来的效果最接近。适合想要保持 HarmonyOS 风格的人。",
+  "FontPackageId": "harmonyos-sc",
   "RequiredFonts": [
     "HarmonyOS Sans SC",
     "HarmonyOS Sans SC Medium"
@@ -10,7 +11,7 @@
     "Segoe UI Light": "HarmonyOS Sans SC",
     "Segoe UI Semilight": "HarmonyOS Sans SC",
     "Segoe UI Semibold": "HarmonyOS Sans SC Medium",
-    "Segoe UI Black": "HarmonyOS Sans SC Bold",
+    "Segoe UI Black": "HarmonyOS Sans SC",
     "Segoe UI Variable": "HarmonyOS Sans SC Medium",
     "Segoe UI Variable Text": "HarmonyOS Sans SC Medium",
     "Segoe UI Variable Text Light": "HarmonyOS Sans SC",

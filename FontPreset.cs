@@ -6,6 +6,7 @@ namespace WindowsFontTuner
     {
         public string Name { get; set; }
         public string Description { get; set; }
+        public string FontPackageId { get; set; }
         public List<string> RequiredFonts { get; set; }
         public Dictionary<string, string> FontSubstitutes { get; set; }
         public DesktopTextSettings DesktopTextSettings { get; set; }

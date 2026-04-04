@@ -14,6 +14,7 @@ namespace WindowsFontTuner
     public sealed class FontTunerService
     {
         private const string FontSubstitutesPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes";
+        private const string FontsRegistryPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts";
         private const string DesktopPath = @"Control Panel\Desktop";
         private const string AvalonGraphicsPath = @"Software\Microsoft\Avalon.Graphics";
         private readonly string _backupRoot;
@@ -46,6 +47,7 @@ namespace WindowsFontTuner
             Directory.CreateDirectory(directory);
 
             ExportRegistry(@"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes", Path.Combine(directory, "FontSubstitutes.reg"));
+            ExportRegistry(@"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts", Path.Combine(directory, "Fonts.reg"));
             ExportRegistry(@"HKCU\Control Panel\Desktop", Path.Combine(directory, "Desktop.reg"));
             ExportRegistry(@"HKCU\Software\Microsoft\Avalon.Graphics", Path.Combine(directory, "Avalon.Graphics.reg"));
             ExportRegistry(@"HKCU\Control Panel\Desktop\WindowMetrics", Path.Combine(directory, "WindowMetrics.reg"));
@@ -90,12 +92,55 @@ namespace WindowsFontTuner
                 throw new InvalidOperationException("未找到备份目录。");
             }
 
+            ImportRegistry(Path.Combine(latest.FullName, "Fonts.reg"));
             ImportRegistry(Path.Combine(latest.FullName, "FontSubstitutes.reg"));
             ImportRegistry(Path.Combine(latest.FullName, "Desktop.reg"));
             ImportRegistry(Path.Combine(latest.FullName, "Avalon.Graphics.reg"));
             ImportRegistry(Path.Combine(latest.FullName, "WindowMetrics.reg"));
             RefreshSystemState(rebuildFontCache, restartExplorer);
             return latest.FullName;
+        }
+
+        public void InstallFontPackage(string baseDirectory, FontPackage package)
+        {
+            if (package == null)
+            {
+                throw new InvalidOperationException("未找到当前预设对应的字体包。");
+            }
+
+            EnsureAdmin();
+
+            string packageDirectory = ResolveFontPackageDirectory(baseDirectory, package);
+            string fontsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts");
+
+            using (RegistryKey key = Registry.LocalMachine.CreateSubKey(FontsRegistryPath))
+            {
+                foreach (FontPackageFile file in package.Files ?? new List<FontPackageFile>())
+                {
+                    if (file == null || string.IsNullOrWhiteSpace(file.RelativePath) || string.IsNullOrWhiteSpace(file.RegistryName))
+                    {
+                        continue;
+                    }
+
+                    string sourceFile = Path.Combine(packageDirectory, file.RelativePath);
+                    if (!File.Exists(sourceFile))
+                    {
+                        throw new FileNotFoundException("字体文件不存在：" + sourceFile, sourceFile);
+                    }
+
+                    string installedFileName = string.IsNullOrWhiteSpace(file.InstalledFileName)
+                        ? Path.GetFileName(sourceFile)
+                        : file.InstalledFileName;
+
+                    string targetFile = Path.Combine(fontsDirectory, installedFileName);
+                    CopyFile(sourceFile, targetFile);
+                    key.SetValue(file.RegistryName, installedFileName, RegistryValueKind.String);
+                    NativeMethods.AddFontResourceEx(targetFile, 0, IntPtr.Zero);
+                }
+            }
+
+            BroadcastFontChange();
+            BroadcastSettingsChanged();
         }
 
         public IList<string> GetInstalledFamilies()
@@ -270,8 +315,37 @@ namespace WindowsFontTuner
             logFont.lfQuality = (byte)settings.Quality;
         }
 
+        private static string ResolveFontPackageDirectory(string baseDirectory, FontPackage package)
+        {
+            if (string.IsNullOrWhiteSpace(baseDirectory))
+            {
+                throw new InvalidOperationException("无法定位程序目录。");
+            }
+
+            string directoryName = string.IsNullOrWhiteSpace(package.DirectoryName) ? package.Id : package.DirectoryName;
+            string packageDirectory = Path.Combine(baseDirectory, "FontPackages", directoryName ?? string.Empty);
+
+            if (!Directory.Exists(packageDirectory))
+            {
+                throw new DirectoryNotFoundException("未找到字体包目录：" + packageDirectory);
+            }
+
+            return packageDirectory;
+        }
+
+        private static void CopyFile(string sourceFile, string targetFile)
+        {
+            if (File.Exists(targetFile))
+            {
+                return;
+            }
+
+            File.Copy(sourceFile, targetFile, false);
+        }
+
         private void RefreshSystemState(bool rebuildFontCache, bool restartExplorer)
         {
+            BroadcastFontChange();
             BroadcastSettingsChanged();
 
             if (rebuildFontCache)
@@ -284,6 +358,7 @@ namespace WindowsFontTuner
                 RestartExplorer();
             }
 
+            BroadcastFontChange();
             BroadcastSettingsChanged();
         }
 
@@ -383,6 +458,19 @@ namespace WindowsFontTuner
                 out result);
         }
 
+        private static void BroadcastFontChange()
+        {
+            UIntPtr result = UIntPtr.Zero;
+            NativeMethods.SendMessageTimeout(
+                NativeMethods.HWND_BROADCAST,
+                NativeMethods.WM_FONTCHANGE,
+                UIntPtr.Zero,
+                "Fonts",
+                NativeMethods.SMTO_ABORTIFHUNG,
+                5000,
+                out result);
+        }
+
         private static void ExportRegistry(string registryPath, string destinationFile)
         {
             RunProcess(Path.Combine(Environment.SystemDirectory, "reg.exe"), string.Format("export \"{0}\" \"{1}\" /y", registryPath, destinationFile));
@@ -439,6 +527,7 @@ namespace WindowsFontTuner
             public const uint SPIF_UPDATEINIFILE = 0x0001;
             public const uint SPIF_SENDCHANGE = 0x0002;
             public const uint WM_SETTINGCHANGE = 0x001A;
+            public const uint WM_FONTCHANGE = 0x001D;
             public const uint SMTO_ABORTIFHUNG = 0x0002;
             public static readonly IntPtr HWND_BROADCAST = new IntPtr(0xffff);
 
@@ -499,6 +588,9 @@ namespace WindowsFontTuner
                 uint fuFlags,
                 uint uTimeout,
                 out UIntPtr lpdwResult);
+
+            [DllImport("gdi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+            public static extern int AddFontResourceEx(string lpszFilename, uint fl, IntPtr pdv);
         }
     }
 }

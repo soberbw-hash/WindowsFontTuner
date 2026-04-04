@@ -46,11 +46,15 @@
     <Compile Include="Program.cs" />
     <Compile Include="MainForm.cs" />
     <Compile Include="FontPreset.cs" />
+    <Compile Include="FontPackage.cs" />
     <Compile Include="FontTunerService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Presets\HarmonyOSUnified.json">
+    <Content Include="Presets\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="FontPackages\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="README.md" />

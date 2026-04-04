@@ -1,0 +1,3 @@
+﻿Source: https://github.com/be5invis/Sarasa-Gothic
+Download archive: https://github.com/be5invis/Sarasa-Gothic/releases/download/v1.0.37/SarasaUi-TTF-1.0.37.zip
+License: SIL Open Font License 1.1 (see LICENSE.txt)

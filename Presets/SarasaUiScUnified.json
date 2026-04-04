@@ -1,0 +1,49 @@
+{
+  "Name": "更纱 UI SC 统一预设",
+  "Description": "三套里最有存在感的一套。笔画更扎实、观感稍厚，适合觉得 Windows 默认太细，想让内容区更容易看清的人。",
+  "FontPackageId": "sarasa-ui-sc",
+  "RequiredFonts": [
+    "Sarasa UI SC",
+    "Sarasa UI SC SemiBold"
+  ],
+  "FontSubstitutes": {
+    "Segoe UI": "Sarasa UI SC SemiBold",
+    "Segoe UI Light": "Sarasa UI SC",
+    "Segoe UI Semilight": "Sarasa UI SC",
+    "Segoe UI Semibold": "Sarasa UI SC SemiBold",
+    "Segoe UI Black": "Sarasa UI SC",
+    "Segoe UI Variable": "Sarasa UI SC SemiBold",
+    "Segoe UI Variable Text": "Sarasa UI SC SemiBold",
+    "Segoe UI Variable Text Light": "Sarasa UI SC",
+    "Segoe UI Variable Text Semibold": "Sarasa UI SC SemiBold",
+    "Segoe UI Variable Display": "Sarasa UI SC SemiBold",
+    "Segoe UI Variable Display Light": "Sarasa UI SC",
+    "Segoe UI Variable Display Semibold": "Sarasa UI SC SemiBold",
+    "Segoe UI Variable Small": "Sarasa UI SC SemiBold",
+    "Segoe UI Variable Small Light": "Sarasa UI SC",
+    "Segoe UI Variable Small Semibold": "Sarasa UI SC SemiBold",
+    "Microsoft YaHei": "Sarasa UI SC SemiBold",
+    "Microsoft YaHei UI": "Sarasa UI SC SemiBold",
+    "Microsoft YaHei Light": "Sarasa UI SC",
+    "Microsoft YaHei UI Light": "Sarasa UI SC",
+    "Microsoft YaHei Semibold": "Sarasa UI SC SemiBold",
+    "Microsoft YaHei UI Semibold": "Sarasa UI SC SemiBold"
+  },
+  "DesktopTextSettings": {
+    "FontSmoothing": "2",
+    "FontSmoothingType": 1,
+    "FontSmoothingGamma": 1850,
+    "FontSmoothingOrientation": 1
+  },
+  "Rendering": {
+    "PixelStructure": 0,
+    "GammaLevel": 1850,
+    "ClearTypeLevel": 0,
+    "TextContrastLevel": 5
+  },
+  "WindowMetrics": {
+    "FaceName": "Sarasa UI SC",
+    "Weight": 560,
+    "Quality": 5
+  }
+}

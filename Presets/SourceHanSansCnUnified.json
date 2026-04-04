@@ -1,0 +1,49 @@
+{
+  "Name": "思源黑体 CN 统一预设",
+  "Description": "最稳妥、最中性的方案。思源黑体 CN 的跨机器一致性最好，适合想要稳定、标准、耐看的系统字体风格。",
+  "FontPackageId": "source-han-sans-cn",
+  "RequiredFonts": [
+    "Source Han Sans CN",
+    "Source Han Sans CN Medium"
+  ],
+  "FontSubstitutes": {
+    "Segoe UI": "Source Han Sans CN Medium",
+    "Segoe UI Light": "Source Han Sans CN",
+    "Segoe UI Semilight": "Source Han Sans CN",
+    "Segoe UI Semibold": "Source Han Sans CN Medium",
+    "Segoe UI Black": "Source Han Sans CN",
+    "Segoe UI Variable": "Source Han Sans CN Medium",
+    "Segoe UI Variable Text": "Source Han Sans CN Medium",
+    "Segoe UI Variable Text Light": "Source Han Sans CN",
+    "Segoe UI Variable Text Semibold": "Source Han Sans CN Medium",
+    "Segoe UI Variable Display": "Source Han Sans CN Medium",
+    "Segoe UI Variable Display Light": "Source Han Sans CN",
+    "Segoe UI Variable Display Semibold": "Source Han Sans CN Medium",
+    "Segoe UI Variable Small": "Source Han Sans CN Medium",
+    "Segoe UI Variable Small Light": "Source Han Sans CN",
+    "Segoe UI Variable Small Semibold": "Source Han Sans CN Medium",
+    "Microsoft YaHei": "Source Han Sans CN Medium",
+    "Microsoft YaHei UI": "Source Han Sans CN Medium",
+    "Microsoft YaHei Light": "Source Han Sans CN",
+    "Microsoft YaHei UI Light": "Source Han Sans CN",
+    "Microsoft YaHei Semibold": "Source Han Sans CN Medium",
+    "Microsoft YaHei UI Semibold": "Source Han Sans CN Medium"
+  },
+  "DesktopTextSettings": {
+    "FontSmoothing": "2",
+    "FontSmoothingType": 1,
+    "FontSmoothingGamma": 1850,
+    "FontSmoothingOrientation": 1
+  },
+  "Rendering": {
+    "PixelStructure": 0,
+    "GammaLevel": 1850,
+    "ClearTypeLevel": 0,
+    "TextContrastLevel": 5
+  },
+  "WindowMetrics": {
+    "FaceName": "Source Han Sans CN",
+    "Weight": 530,
+    "Quality": 5
+  }
+}

@@ -10,4 +10,5 @@ Thumbs.db
 .vs/
 artifacts/
 dist/
+third_party/
 *.zip

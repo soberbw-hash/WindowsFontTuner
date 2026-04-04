@@ -1,0 +1,86 @@
+[
+  {
+    "Id": "harmonyos-sc",
+    "DirectoryName": "harmonyos-sc",
+    "Name": "HarmonyOS Sans SC",
+    "Description": "当前默认推荐，观感现代，和这台机器已经调好的效果最接近。",
+    "RecommendedFor": "想要现代、干净、接近 HarmonyOS 风格的人。",
+    "LicenseName": "GPL-3.0",
+    "LicenseUrl": "https://github.com/huawei-fonts/HarmonyOS-Sans/blob/main/LICENSE",
+    "SourceUrl": "https://github.com/huawei-fonts/HarmonyOS-Sans",
+    "RequiredFonts": [
+      "HarmonyOS Sans SC",
+      "HarmonyOS Sans SC Medium"
+    ],
+    "Files": [
+      {
+        "RelativePath": "HarmonyOS_Sans_SC_Regular.ttf",
+        "RegistryName": "HarmonyOS Sans SC (TrueType)"
+      },
+      {
+        "RelativePath": "HarmonyOS_Sans_SC_Medium.ttf",
+        "RegistryName": "HarmonyOS Sans SC Medium (TrueType)"
+      },
+      {
+        "RelativePath": "HarmonyOS_Sans_SC_Bold.ttf",
+        "RegistryName": "HarmonyOS Sans SC Bold (TrueType)"
+      }
+    ]
+  },
+  {
+    "Id": "source-han-sans-cn",
+    "DirectoryName": "source-han-sans-cn",
+    "Name": "Source Han Sans CN",
+    "Description": "最稳妥、最中性的开源中文黑体，跨机器一致性很好。",
+    "RecommendedFor": "想要稳定、标准、耐看的默认系统字风格的人。",
+    "LicenseName": "SIL Open Font License 1.1",
+    "LicenseUrl": "https://github.com/adobe-fonts/source-han-sans/blob/master/LICENSE.txt",
+    "SourceUrl": "https://github.com/adobe-fonts/source-han-sans",
+    "RequiredFonts": [
+      "Source Han Sans CN",
+      "Source Han Sans CN Medium"
+    ],
+    "Files": [
+      {
+        "RelativePath": "SourceHanSansCN-Regular.otf",
+        "RegistryName": "Source Han Sans CN (OpenType)"
+      },
+      {
+        "RelativePath": "SourceHanSansCN-Medium.otf",
+        "RegistryName": "Source Han Sans CN Medium (OpenType)"
+      },
+      {
+        "RelativePath": "SourceHanSansCN-Bold.otf",
+        "RegistryName": "Source Han Sans CN Bold (OpenType)"
+      }
+    ]
+  },
+  {
+    "Id": "sarasa-ui-sc",
+    "DirectoryName": "sarasa-ui-sc",
+    "Name": "Sarasa UI SC",
+    "Description": "笔画更扎实、内容区更有存在感的一套黑体。",
+    "RecommendedFor": "觉得 Windows 默认太细，想让资源管理器和内容区更容易看清的人。",
+    "LicenseName": "SIL Open Font License 1.1",
+    "LicenseUrl": "https://github.com/be5invis/Sarasa-Gothic/blob/main/LICENSE",
+    "SourceUrl": "https://github.com/be5invis/Sarasa-Gothic",
+    "RequiredFonts": [
+      "Sarasa UI SC",
+      "Sarasa UI SC SemiBold"
+    ],
+    "Files": [
+      {
+        "RelativePath": "SarasaUiSC-Regular.ttf",
+        "RegistryName": "Sarasa UI SC (TrueType)"
+      },
+      {
+        "RelativePath": "SarasaUiSC-SemiBold.ttf",
+        "RegistryName": "Sarasa UI SC SemiBold (TrueType)"
+      },
+      {
+        "RelativePath": "SarasaUiSC-Bold.ttf",
+        "RegistryName": "Sarasa UI SC Bold (TrueType)"
+      }
+    ]
+  }
+]

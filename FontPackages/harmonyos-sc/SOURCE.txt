@@ -1,0 +1,3 @@
+﻿Source: https://github.com/huawei-fonts/HarmonyOS-Sans
+Download archive: https://media.githubusercontent.com/media/huawei-fonts/HarmonyOS-Sans/main/HarmonyOS%20Sans.zip
+License: GPL-3.0 (see LICENSE.txt)
