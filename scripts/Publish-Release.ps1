@@ -21,18 +21,23 @@ if (-not $ReleaseNotes) {
 }
 
 function Get-GitHubToken {
-    $credentialQuery = @"
-protocol=https
-host=github.com
-path=soberbw-hash/WindowsFontTuner.git
-"@
-    $creds = $credentialQuery | git credential fill
-    $passwordLine = $creds | Select-String '^password=' | Select-Object -First 1
-    if (-not $passwordLine) {
-        throw '没有读取到 GitHub token。'
-    }
+    $tempQueryPath = Join-Path ([System.IO.Path]::GetTempPath()) ('windowsfonttuner-credential-' + [guid]::NewGuid().ToString('N') + '.txt')
 
-    return $passwordLine.ToString().Substring(9)
+    try {
+        Set-Content -LiteralPath $tempQueryPath -Encoding ASCII -NoNewline -Value "protocol=https`r`nhost=github.com`r`npath=soberbw-hash/WindowsFontTuner.git`r`n`r`n"
+        $creds = & cmd /c ("git credential fill < `"" + $tempQueryPath + "`"")
+        $passwordLine = $creds | Select-String '^password=' | Select-Object -First 1
+        if (-not $passwordLine) {
+            throw '没有读取到 GitHub token。'
+        }
+
+        return $passwordLine.ToString().Substring(9)
+    }
+    finally {
+        if (Test-Path -LiteralPath $tempQueryPath) {
+            Remove-Item -LiteralPath $tempQueryPath -Force -ErrorAction SilentlyContinue
+        }
+    }
 }
 
 function Invoke-GitHubJson {
