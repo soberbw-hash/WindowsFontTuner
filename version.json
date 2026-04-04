@@ -1,0 +1,9 @@
+{
+  "version": "0.4.2",
+  "tag": "v0.4.2",
+  "name": "Windows字体调谐器 v0.4.2",
+  "releaseUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/tag/v0.4.2",
+  "downloadUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/download/v0.4.2/WindowsFontTuner-v0.4.2-win64.zip",
+  "publishedAt": "2026-04-04T12:10:00Z",
+  "notes": "修正顶部标题区和管理员提示被裁切的问题，并把检查更新切到更稳定的公开版本文件。"
+}

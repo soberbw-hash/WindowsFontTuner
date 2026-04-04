@@ -155,7 +155,7 @@ namespace WindowsFontTuner
             _versionBadgeLabel.ForeColor = UiPalette.Accent;
             _versionBadgeLabel.Font = new Font(Font.FontFamily, 9f, FontStyle.Bold);
             _versionBadgeLabel.Padding = new Padding(12, 6, 12, 6);
-            _versionBadgeLabel.Location = new Point(0, 118);
+            _versionBadgeLabel.Location = new Point(0, 104);
             left.Controls.Add(_versionBadgeLabel);
 
             Panel right = new Panel();
@@ -391,7 +391,10 @@ namespace WindowsFontTuner
             layout.Controls.Add(title, 0, 0);
 
             _adminLabel = new Label();
-            _adminLabel.AutoSize = true;
+            _adminLabel.AutoSize = false;
+            _adminLabel.Dock = DockStyle.Top;
+            _adminLabel.Height = 30;
+            _adminLabel.TextAlign = ContentAlignment.MiddleLeft;
             _adminLabel.BackColor = Color.Transparent;
             _adminLabel.Font = new Font(Font.FontFamily, 9.5f, FontStyle.Bold);
             _adminLabel.Margin = new Padding(0, 10, 0, 0);

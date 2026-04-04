@@ -9,6 +9,9 @@ namespace WindowsFontTuner
     public sealed class UpdateService
     {
         private const string LatestReleaseApi = "https://api.github.com/repos/soberbw-hash/WindowsFontTuner/releases/latest";
+        private const string VersionManifestRaw = "https://raw.githubusercontent.com/soberbw-hash/WindowsFontTuner/main/version.json";
+        private const string VersionManifestCdn = "https://cdn.jsdelivr.net/gh/soberbw-hash/WindowsFontTuner@main/version.json";
+
         public const string RepositoryPage = "https://github.com/soberbw-hash/WindowsFontTuner";
         public const string LatestReleasePage = "https://github.com/soberbw-hash/WindowsFontTuner/releases/latest";
 
@@ -17,13 +20,73 @@ namespace WindowsFontTuner
             Version normalizedCurrent = NormalizeVersion(currentVersion);
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(LatestReleaseApi);
-            request.Method = "GET";
+            try
+            {
+                return CheckForUpdatesByManifest(normalizedCurrent, VersionManifestRaw);
+            }
+            catch (WebException)
+            {
+            }
+
+            try
+            {
+                return CheckForUpdatesByManifest(normalizedCurrent, VersionManifestCdn);
+            }
+            catch (WebException)
+            {
+            }
+
+            try
+            {
+                return CheckForUpdatesByApi(normalizedCurrent);
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse response = ex.Response as HttpWebResponse;
+                if (response != null && ((int)response.StatusCode == 403 || (int)response.StatusCode == 429))
+                {
+                    return CheckForUpdatesByRedirect(normalizedCurrent);
+                }
+
+                throw;
+            }
+        }
+
+        private UpdateCheckResult CheckForUpdatesByManifest(Version normalizedCurrent, string manifestUrl)
+        {
+            HttpWebRequest request = CreateRequest(manifestUrl);
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream stream = response.GetResponseStream())
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                VersionManifest manifest = serializer.Deserialize<VersionManifest>(json);
+
+                Version normalizedLatest = NormalizeVersion(ParseVersion(manifest == null ? null : manifest.version));
+                UpdateCheckResult result = new UpdateCheckResult();
+                result.CurrentVersion = normalizedCurrent;
+                result.LatestVersion = normalizedLatest;
+                result.LatestTag = manifest == null ? null : manifest.tag;
+                result.ReleaseName = manifest == null ? null : manifest.name;
+                result.ReleaseUrl = string.IsNullOrWhiteSpace(manifest == null ? null : manifest.releaseUrl)
+                    ? LatestReleasePage
+                    : manifest.releaseUrl;
+                result.DownloadUrl = string.IsNullOrWhiteSpace(manifest == null ? null : manifest.downloadUrl)
+                    ? result.ReleaseUrl
+                    : manifest.downloadUrl;
+                result.ReleaseBody = manifest == null ? null : manifest.notes;
+                result.PublishedAt = ParseDate(manifest == null ? null : manifest.publishedAt);
+                result.IsUpdateAvailable = normalizedLatest != null && normalizedLatest > normalizedCurrent;
+                return result;
+            }
+        }
+
+        private UpdateCheckResult CheckForUpdatesByApi(Version normalizedCurrent)
+        {
+            HttpWebRequest request = CreateRequest(LatestReleaseApi);
             request.Accept = "application/vnd.github+json";
-            request.UserAgent = "WindowsFontTuner";
-            request.Timeout = 8000;
-            request.ReadWriteTimeout = 8000;
-            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             request.Headers["X-GitHub-Api-Version"] = "2022-11-28";
 
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
@@ -51,6 +114,44 @@ namespace WindowsFontTuner
                 result.IsUpdateAvailable = normalizedLatest != null && normalizedLatest > normalizedCurrent;
                 return result;
             }
+        }
+
+        private UpdateCheckResult CheckForUpdatesByRedirect(Version normalizedCurrent)
+        {
+            HttpWebRequest request = CreateRequest(LatestReleasePage);
+            request.AllowAutoRedirect = true;
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                Uri finalUri = response.ResponseUri ?? new Uri(LatestReleasePage);
+                string latestTag = finalUri.Segments.Length > 0
+                    ? finalUri.Segments[finalUri.Segments.Length - 1].TrimEnd('/')
+                    : null;
+                Version normalizedLatest = NormalizeVersion(ParseVersion(latestTag));
+
+                UpdateCheckResult result = new UpdateCheckResult();
+                result.CurrentVersion = normalizedCurrent;
+                result.LatestVersion = normalizedLatest;
+                result.LatestTag = latestTag;
+                result.ReleaseName = latestTag;
+                result.ReleaseUrl = finalUri.ToString();
+                result.DownloadUrl = finalUri.ToString();
+                result.ReleaseBody = "当前通过 GitHub 发布页重定向检查版本。";
+                result.PublishedAt = null;
+                result.IsUpdateAvailable = normalizedLatest != null && normalizedLatest > normalizedCurrent;
+                return result;
+            }
+        }
+
+        private static HttpWebRequest CreateRequest(string url)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "GET";
+            request.UserAgent = "WindowsFontTuner";
+            request.Timeout = 8000;
+            request.ReadWriteTimeout = 8000;
+            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            return request;
         }
 
         private static string GetBestAssetUrl(GitHubReleaseResponse release)
@@ -125,6 +226,17 @@ namespace WindowsFontTuner
                 Math.Max(version.Minor, 0),
                 Math.Max(version.Build, 0),
                 Math.Max(version.Revision, 0));
+        }
+
+        private sealed class VersionManifest
+        {
+            public string version { get; set; }
+            public string tag { get; set; }
+            public string name { get; set; }
+            public string releaseUrl { get; set; }
+            public string downloadUrl { get; set; }
+            public string publishedAt { get; set; }
+            public string notes { get; set; }
         }
 
         private sealed class GitHubReleaseResponse
