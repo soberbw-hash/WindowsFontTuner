@@ -1,6 +1,6 @@
 {
-  "Name": "HarmonyOS Unified",
-  "Description": "Backs up the current Windows font-related keys, switches Segoe UI and Segoe UI Variable aliases to HarmonyOS Sans SC / HarmonyOS Sans SC Medium, applies grayscale rendering, and updates legacy icon and menu fonts to HarmonyOS Sans SC weight 550.",
+  "Name": "HarmonyOS 统一预设",
+  "Description": "备份当前 Windows 字体相关注册表项，将 Segoe UI 和 Segoe UI Variable 系列别名切换到 HarmonyOS Sans SC / HarmonyOS Sans SC Medium，应用灰阶渲染参数，并把传统桌面图标、菜单和窗口字体更新为 HarmonyOS Sans SC 550 字重。",
   "RequiredFonts": [
     "HarmonyOS Sans SC",
     "HarmonyOS Sans SC Medium"

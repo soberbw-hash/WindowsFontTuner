@@ -15,7 +15,7 @@ namespace WindowsFontTuner
 
         public override string ToString()
         {
-            return string.IsNullOrWhiteSpace(Name) ? "(Unnamed preset)" : Name;
+            return string.IsNullOrWhiteSpace(Name) ? "(未命名预设)" : Name;
         }
     }
 

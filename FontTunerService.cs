@@ -57,7 +57,7 @@ namespace WindowsFontTuner
         {
             if (preset == null)
             {
-                throw new ArgumentNullException("preset");
+                throw new ArgumentNullException("preset", "未提供要应用的预设。");
             }
 
             EnsureAdmin();
@@ -77,7 +77,7 @@ namespace WindowsFontTuner
 
             if (!Directory.Exists(_backupRoot))
             {
-                throw new InvalidOperationException("No backups have been created yet.");
+                throw new InvalidOperationException("还没有可恢复的备份。");
             }
 
             DirectoryInfo latest = new DirectoryInfo(_backupRoot)
@@ -87,7 +87,7 @@ namespace WindowsFontTuner
 
             if (latest == null)
             {
-                throw new InvalidOperationException("No backups were found.");
+                throw new InvalidOperationException("未找到备份目录。");
             }
 
             ImportRegistry(Path.Combine(latest.FullName, "FontSubstitutes.reg"));
@@ -213,7 +213,7 @@ namespace WindowsFontTuner
 
             if (!gotIconFont)
             {
-                throw new InvalidOperationException("Unable to read icon title font settings.");
+                throw new InvalidOperationException("无法读取桌面图标字体设置。");
             }
 
             iconFont.lfFaceName = settings.FaceName;
@@ -228,7 +228,7 @@ namespace WindowsFontTuner
 
             if (!setIconFont)
             {
-                throw new InvalidOperationException("Unable to update icon title font settings.");
+                throw new InvalidOperationException("无法更新桌面图标字体设置。");
             }
 
             NativeMethods.NONCLIENTMETRICS metrics = new NativeMethods.NONCLIENTMETRICS();
@@ -242,7 +242,7 @@ namespace WindowsFontTuner
 
             if (!gotMetrics)
             {
-                throw new InvalidOperationException("Unable to read non-client metrics.");
+                throw new InvalidOperationException("无法读取窗口字体参数。");
             }
 
             UpdateLogFont(ref metrics.lfCaptionFont, settings);
@@ -259,7 +259,7 @@ namespace WindowsFontTuner
 
             if (!setMetrics)
             {
-                throw new InvalidOperationException("Unable to update non-client metrics.");
+                throw new InvalidOperationException("无法更新窗口字体参数。");
             }
         }
 
@@ -426,7 +426,7 @@ namespace WindowsFontTuner
         {
             if (!IsAdministrator())
             {
-                throw new InvalidOperationException("This tool must be run as Administrator.");
+                throw new InvalidOperationException("请右键以管理员身份运行本工具。");
             }
         }
 

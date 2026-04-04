@@ -1,0 +1,20 @@
+Windows字体调谐器 使用说明
+
+1. 请先安装预设所需的字体。
+   当前默认预设需要：
+   - HarmonyOS Sans SC
+   - HarmonyOS Sans SC Medium
+
+2. 右键 WindowsFontTuner.exe，选择“以管理员身份运行”。
+
+3. 在软件里选择预设后，点击“应用当前预设”。
+
+4. 如果你想回退，可以点击“恢复最近备份”。
+
+5. 备份会自动保存到：
+   %LOCALAPPDATA%\WindowsFontTuner\Backups
+
+注意事项：
+- 本工具不会内置第三方字体文件。
+- Windows 11 不同界面对字体设置的响应可能不同。
+- 建议在修改前关闭不必要的软件，并在应用后重新打开常用程序查看效果。

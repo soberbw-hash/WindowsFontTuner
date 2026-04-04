@@ -25,7 +25,7 @@ namespace WindowsFontTuner
             _service = new FontTunerService();
             _presets = new List<FontPreset>();
 
-            Text = "Windows Font Tuner";
+            Text = "Windows字体调谐器";
             Width = 920;
             Height = 700;
             MinimumSize = new Size(760, 560);
@@ -49,7 +49,7 @@ namespace WindowsFontTuner
             Label titleLabel = new Label();
             titleLabel.AutoSize = true;
             titleLabel.Font = new Font(Font, FontStyle.Bold);
-            titleLabel.Text = "Open-source-ready font tuning utility";
+            titleLabel.Text = "开源可扩展的 Windows 字体调谐工具";
             root.Controls.Add(titleLabel, 0, 0);
 
             _adminLabel = new Label();
@@ -64,7 +64,7 @@ namespace WindowsFontTuner
             root.Controls.Add(presetPanel, 0, 2);
 
             Label presetLabel = new Label();
-            presetLabel.Text = "Preset:";
+            presetLabel.Text = "预设：";
             presetLabel.AutoSize = true;
             presetLabel.Location = new Point(0, 10);
             presetPanel.Controls.Add(presetLabel);
@@ -82,11 +82,11 @@ namespace WindowsFontTuner
             actions.Margin = new Padding(0, 12, 0, 0);
             root.Controls.Add(actions, 0, 3);
 
-            actions.Controls.Add(BuildButton("Apply Selected Preset", ApplyButton_Click));
-            actions.Controls.Add(BuildButton("Create Backup", BackupButton_Click));
-            actions.Controls.Add(BuildButton("Restore Latest Backup", RestoreButton_Click));
-            actions.Controls.Add(BuildButton("Open Backups Folder", OpenBackupsButton_Click));
-            actions.Controls.Add(BuildButton("Open Presets Folder", OpenPresetsButton_Click));
+            actions.Controls.Add(BuildButton("应用当前预设", ApplyButton_Click));
+            actions.Controls.Add(BuildButton("创建备份", BackupButton_Click));
+            actions.Controls.Add(BuildButton("恢复最近备份", RestoreButton_Click));
+            actions.Controls.Add(BuildButton("打开备份目录", OpenBackupsButton_Click));
+            actions.Controls.Add(BuildButton("打开预设目录", OpenPresetsButton_Click));
 
             FlowLayoutPanel optionsPanel = new FlowLayoutPanel();
             optionsPanel.AutoSize = true;
@@ -95,13 +95,13 @@ namespace WindowsFontTuner
             root.Controls.Add(optionsPanel, 0, 4);
 
             _rebuildCacheCheckBox = new CheckBox();
-            _rebuildCacheCheckBox.Text = "Rebuild font cache";
+            _rebuildCacheCheckBox.Text = "重建字体缓存";
             _rebuildCacheCheckBox.Checked = true;
             _rebuildCacheCheckBox.AutoSize = true;
             optionsPanel.Controls.Add(_rebuildCacheCheckBox);
 
             _restartExplorerCheckBox = new CheckBox();
-            _restartExplorerCheckBox.Text = "Restart Explorer after apply";
+            _restartExplorerCheckBox.Text = "应用后重启资源管理器";
             _restartExplorerCheckBox.Checked = true;
             _restartExplorerCheckBox.AutoSize = true;
             optionsPanel.Controls.Add(_restartExplorerCheckBox);
@@ -143,12 +143,12 @@ namespace WindowsFontTuner
         private void MainForm_Load(object sender, EventArgs e)
         {
             _adminLabel.Text = _service.IsAdministrator()
-                ? "Admin mode: enabled"
-                : "Admin mode: missing. Run the built exe as Administrator before applying changes.";
+                ? "管理员模式：已启用"
+                : "管理员模式：未启用。应用修改前请右键以管理员身份运行。";
 
             LoadPresets();
-            Log("Backup root: " + _service.BackupRoot);
-            Log("Fonts are not bundled. Install official fonts first, then apply a preset.");
+            Log("备份目录：" + _service.BackupRoot);
+            Log("本工具不内置字体，请先安装官方字体，再应用预设。");
         }
 
         private void LoadPresets()
@@ -192,7 +192,7 @@ namespace WindowsFontTuner
 
             if (preset == null)
             {
-                _descriptionLabel.Text = "No preset selected.";
+                _descriptionLabel.Text = "未选择预设。";
                 _fontHintLabel.Text = string.Empty;
                 return;
             }
@@ -202,11 +202,11 @@ namespace WindowsFontTuner
             IList<string> missing = _service.GetMissingFonts(preset);
             if (missing.Count == 0)
             {
-                _fontHintLabel.Text = "Required fonts look installed: " + string.Join(", ", preset.RequiredFonts ?? new List<string>());
+                _fontHintLabel.Text = "已检测到所需字体：" + string.Join(", ", preset.RequiredFonts ?? new List<string>());
             }
             else
             {
-                _fontHintLabel.Text = "Missing required fonts: " + string.Join(", ", missing);
+                _fontHintLabel.Text = "缺少所需字体：" + string.Join(", ", missing);
             }
         }
 
@@ -216,7 +216,7 @@ namespace WindowsFontTuner
 
             if (preset == null)
             {
-                MessageBox.Show(this, "Pick a preset first.", "Windows Font Tuner", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(this, "请先选择一个预设。", "Windows字体调谐器", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -225,8 +225,8 @@ namespace WindowsFontTuner
             {
                 DialogResult proceed = MessageBox.Show(
                     this,
-                    "These fonts are missing:\r\n\r\n" + string.Join("\r\n", missing) + "\r\n\r\nContinue anyway?",
-                    "Missing fonts",
+                    "检测到以下字体未安装：\r\n\r\n" + string.Join("\r\n", missing) + "\r\n\r\n仍然继续吗？",
+                    "缺少字体",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Warning);
 
@@ -236,24 +236,24 @@ namespace WindowsFontTuner
                 }
             }
 
-            RunAction("Apply preset", delegate
+            RunAction("应用预设", delegate
             {
                 string backup = _service.ApplyPreset(
                     preset,
                     _rebuildCacheCheckBox.Checked,
                     _restartExplorerCheckBox.Checked);
 
-                Log("Applied preset: " + preset.Name);
-                Log("Backup created: " + backup);
+                Log("已应用预设：" + preset.Name);
+                Log("已创建备份：" + backup);
             });
         }
 
         private void BackupButton_Click(object sender, EventArgs e)
         {
-            RunAction("Create backup", delegate
+            RunAction("创建备份", delegate
             {
                 string backup = _service.CreateBackup();
-                Log("Backup created: " + backup);
+                Log("已创建备份：" + backup);
             });
         }
 
@@ -261,8 +261,8 @@ namespace WindowsFontTuner
         {
             DialogResult confirm = MessageBox.Show(
                 this,
-                "Restore the latest backup and refresh Explorer?",
-                "Restore latest backup",
+                "要恢复最近一次备份并刷新资源管理器吗？",
+                "恢复最近备份",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
@@ -271,13 +271,13 @@ namespace WindowsFontTuner
                 return;
             }
 
-            RunAction("Restore latest backup", delegate
+            RunAction("恢复最近备份", delegate
             {
                 string restored = _service.RestoreLatestBackup(
                     _rebuildCacheCheckBox.Checked,
                     _restartExplorerCheckBox.Checked);
 
-                Log("Restored backup: " + restored);
+                Log("已恢复备份：" + restored);
             });
         }
 
@@ -301,11 +301,11 @@ namespace WindowsFontTuner
                 Enabled = false;
                 Application.DoEvents();
                 action();
-                Log(actionName + " finished.");
+                Log(actionName + "完成。");
             }
             catch (Exception ex)
             {
-                Log(actionName + " failed: " + ex.Message);
+                Log(actionName + "失败：" + ex.Message);
                 MessageBox.Show(this, ex.Message, actionName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
