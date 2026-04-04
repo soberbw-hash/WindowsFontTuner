@@ -945,6 +945,7 @@ namespace WindowsFontTuner
             actions.Controls.Add(_installFontsButton);
             actions.Controls.Add(BuildButton("创建备份", BackupButton_Click, ModernButtonStyle.Secondary, 104));
             actions.Controls.Add(BuildButton("恢复最近备份", RestoreButton_Click, ModernButtonStyle.Secondary, 128));
+            actions.Controls.Add(BuildButton("恢复 Windows 默认", ResetWindowsDefaultsButton_Click, ModernButtonStyle.Ghost, 146));
 
             ModernCardPanel descriptionCard = CreateCard(false, 24, UiPalette.CardAltBackground);
             descriptionCard.ShowShadow = false;
@@ -1308,11 +1309,11 @@ namespace WindowsFontTuner
             noteCard.Controls.Add(noteTitle);
 
             Label noteBody = CreateMutedLabel(
-                "1. 预设里包含字体映射和渲染参数。\r\n2. 每次应用前都会自动留快照。\r\n3. 如果别人只是想用，优先发安装包。",
+                "1. 预设里包含字体映射和渲染参数。\r\n2. 每次应用前都会自动留快照。\r\n3. 恢复默认会清掉本工具写入的替换项。\r\n4. 系统字体文件缺失时，请点“修复系统字体”。",
                 16,
                 36,
                 328,
-                80);
+                92);
             noteCard.Controls.Add(noteBody);
 
             return card;
@@ -1343,6 +1344,8 @@ namespace WindowsFontTuner
 
             actions.Controls.Add(BuildButton("新建备份", BackupButton_Click, ModernButtonStyle.Primary, 98));
             actions.Controls.Add(BuildButton("恢复最近备份", RestoreButton_Click, ModernButtonStyle.Secondary, 128));
+            actions.Controls.Add(BuildButton("恢复 Windows 默认", ResetWindowsDefaultsButton_Click, ModernButtonStyle.Secondary, 146));
+            actions.Controls.Add(BuildButton("修复系统字体", RepairSystemFontsButton_Click, ModernButtonStyle.Ghost, 118));
 
             _backupListPanel = new FlowLayoutPanel();
             _backupListPanel.Location = new Point(22, 140);
@@ -2151,6 +2154,26 @@ namespace WindowsFontTuner
             }
         }
 
+        private bool ShouldRebuildFontCache()
+        {
+            if (_settingsRebuildCacheCheckBox != null)
+            {
+                return _settingsRebuildCacheCheckBox.Checked;
+            }
+
+            return _rebuildCacheCheckBox != null && _rebuildCacheCheckBox.Checked;
+        }
+
+        private bool ShouldRestartExplorer()
+        {
+            if (_settingsRestartExplorerCheckBox != null)
+            {
+                return _settingsRestartExplorerCheckBox.Checked;
+            }
+
+            return _restartExplorerCheckBox != null && _restartExplorerCheckBox.Checked;
+        }
+
         private void BackupListPanel_Resize(object sender, EventArgs e)
         {
             AdjustBackupCardWidths();
@@ -2416,8 +2439,8 @@ namespace WindowsFontTuner
 
                 string backup = _service.ApplyPreset(
                     preset,
-                    _rebuildCacheCheckBox != null && _rebuildCacheCheckBox.Checked,
-                    _restartExplorerCheckBox != null && _restartExplorerCheckBox.Checked);
+                    ShouldRebuildFontCache(),
+                    ShouldRestartExplorer());
 
                 Log("已应用预设：" + SafeText(preset.Name, "未命名预设"));
                 Log("已创建备份：" + backup);
@@ -2453,12 +2476,69 @@ namespace WindowsFontTuner
             RunAction("恢复最近备份", delegate
             {
                 string restored = _service.RestoreLatestBackup(
-                    _rebuildCacheCheckBox != null && _rebuildCacheCheckBox.Checked,
-                    _restartExplorerCheckBox != null && _restartExplorerCheckBox.Checked);
+                    ShouldRebuildFontCache(),
+                    ShouldRestartExplorer());
 
                 Log("已恢复备份：" + restored);
                 RefreshPresetDetails();
                 RefreshBackupList();
+            });
+        }
+
+        private void ResetWindowsDefaultsButton_Click(object sender, EventArgs e)
+        {
+            DialogResult confirm = MessageBox.Show(
+                this,
+                "这会先自动创建一份当前快照，然后执行以下恢复动作：" + Environment.NewLine + Environment.NewLine +
+                "1. 清除本工具写入的字体替换项" + Environment.NewLine +
+                "2. 把窗口字体和文字渲染恢复到 Windows 默认风格" + Environment.NewLine +
+                "3. 按你的设置重建字体缓存并重启资源管理器" + Environment.NewLine + Environment.NewLine +
+                "如果系统自带字体文件已经被删掉，这一步只能恢复设置，字体文件本身请再点“修复系统字体”。" + Environment.NewLine + Environment.NewLine +
+                "确定继续吗？",
+                "恢复 Windows 默认",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes)
+            {
+                return;
+            }
+
+            RunAction("恢复 Windows 默认", delegate
+            {
+                string backup = _service.ResetToWindowsDefaults(
+                    ShouldRebuildFontCache(),
+                    ShouldRestartExplorer());
+
+                Log("已恢复 Windows 默认字体设置。");
+                Log("已创建备份：" + backup);
+                RefreshPresetDetails();
+                RefreshBackupList();
+            });
+        }
+
+        private void RepairSystemFontsButton_Click(object sender, EventArgs e)
+        {
+            DialogResult confirm = MessageBox.Show(
+                this,
+                "这会打开管理员命令窗口，并按微软官方建议依次运行：" + Environment.NewLine + Environment.NewLine +
+                "DISM.exe /Online /Cleanup-Image /RestoreHealth" + Environment.NewLine +
+                "sfc /scannow" + Environment.NewLine + Environment.NewLine +
+                "它适合用来修复被删掉或损坏的系统字体文件，过程可能比较久，也可能会用到 Windows Update。" + Environment.NewLine + Environment.NewLine +
+                "现在开始吗？",
+                "修复系统字体",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes)
+            {
+                return;
+            }
+
+            RunAction("启动系统字体修复", delegate
+            {
+                _service.LaunchSystemFontRepair();
+                Log("已启动 Windows 官方修复：DISM /RestoreHealth + sfc /scannow。");
             });
         }
 
@@ -2488,8 +2568,8 @@ namespace WindowsFontTuner
             {
                 _service.RestoreBackup(
                     backupPath,
-                    _rebuildCacheCheckBox != null && _rebuildCacheCheckBox.Checked,
-                    _restartExplorerCheckBox != null && _restartExplorerCheckBox.Checked);
+                    ShouldRebuildFontCache(),
+                    ShouldRestartExplorer());
 
                 Log("已恢复备份：" + backupPath);
                 RefreshPresetDetails();

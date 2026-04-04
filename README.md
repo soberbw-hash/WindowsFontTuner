@@ -13,6 +13,8 @@
 - 一键应用更舒服的文字渲染参数
 - 自动备份 `FontSubstitutes`、`Desktop`、`Avalon.Graphics`、`WindowMetrics`
 - 一键恢复最近一次备份，翻车了也能撤回
+- 一键恢复 `Windows 默认` 字体映射和渲染参数
+- 一键启动 `DISM + SFC` 官方修复流程，处理系统字体文件缺失
 - 内置字体包，不用再自己满网找字体
 - 支持检查更新，后续发新版本软件里能直接提示
 
@@ -48,6 +50,8 @@
 5. 点击“安装所需字体”。
 6. 点击“应用当前预设”。
 7. 如果效果不满意，点击“恢复最近备份”。
+8. 如果想回到微软原生方案，点击“恢复 Windows 默认”。
+9. 如果系统自带字体文件被误删，再点“修复系统字体”。
 
 ## 🧠 软件里实际做了什么
 
@@ -57,6 +61,8 @@
 - 自动安装当前预设所需字体
 - 自动导出一份注册表备份到 `%LOCALAPPDATA%\\WindowsFontTuner\\Backups`
 - 写入字体替换、渲染参数和窗口字体设置
+- 支持清除本工具写入过的字体映射，恢复 Windows 默认状态
+- 支持调用微软官方的 `DISM /RestoreHealth` 和 `sfc /scannow`
 - 重建字体缓存并按需重启资源管理器
 
 ## ⚠️ 先把边界说清楚
@@ -65,6 +71,13 @@
 - 这个工具不保证系统里每一个角落都会 100% 跟着同一套字体走
 - 它不会自动卸载已经安装到系统里的字体文件
 - 它不会去改 Explorer 的私有资源，也不会碰 WinUI / XAML 私有样式
+- 公开 Release 不会附带 `Segoe UI`、`Segoe UI Variable` 这类 Windows 自带字体文件
+
+为什么不把微软默认字体一起打包？
+
+- 微软官方字体 FAQ 明确写了：除文档嵌入等特殊情况外，`Windows 自带字体不能被重新分发`
+- `Segoe UI` 这类字体在官方列表里也标的是 `Download N/A`，只随微软产品提供
+- 所以这个项目里“恢复默认”的做法是：恢复注册表和渲染参数；如果系统字体文件本身坏了或被删了，再调用 Windows 官方修复
 
 ## ❓为什么没有 MiSans
 
@@ -89,6 +102,8 @@
 - [HarmonyOS Sans 官方仓库](https://github.com/huawei-fonts/HarmonyOS-Sans)
 - [Source Han Sans 官方仓库](https://github.com/adobe-fonts/source-han-sans)
 - [Sarasa Gothic 官方仓库](https://github.com/be5invis/Sarasa-Gothic)
+- [Microsoft Font redistribution FAQ](https://learn.microsoft.com/en-my/typography/fonts/font-faq)
+- [Segoe UI font family](https://learn.microsoft.com/en-us/typography/font-list/segoe-ui)
 
 ## 🛠️ 自己构建
 
@@ -109,7 +124,7 @@ bin\Release\WindowsFontTuner.exe
 如果你想一次性打出 `zip` 便携包和 `Setup.exe` 安装包：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Build-Packages.ps1 -Version 0.4.4
+powershell -ExecutionPolicy Bypass -File .\scripts\Build-Packages.ps1 -Version 0.5.2
 ```
 
 ## 🧩 自定义预设
@@ -142,13 +157,13 @@ git push -u origin main
 
 ```powershell
 $assets = @(
-  '.\dist\WindowsFontTuner-v0.4.4-win64.zip',
-  '.\dist\WindowsFontTuner-Setup-v0.4.4.exe'
+  '.\dist\WindowsFontTuner-v0.5.2-win64.zip',
+  '.\dist\WindowsFontTuner-Setup-v0.5.2.exe'
 )
 
 powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 `
-  -Version 0.4.4 `
-  -ReleaseName 'Windows全局字体替换器 v0.4.4' `
+  -Version 0.5.2 `
+  -ReleaseName 'Windows全局字体替换器 v0.5.2' `
   -AssetPaths $assets
 ```
 

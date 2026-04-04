@@ -2,8 +2,10 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -17,6 +19,30 @@ namespace WindowsFontTuner
         private const string FontsRegistryPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts";
         private const string DesktopPath = @"Control Panel\Desktop";
         private const string AvalonGraphicsPath = @"Software\Microsoft\Avalon.Graphics";
+        private static readonly string[] ManagedFontSubstituteNames =
+        {
+            "Segoe UI",
+            "Segoe UI Light",
+            "Segoe UI Semilight",
+            "Segoe UI Semibold",
+            "Segoe UI Black",
+            "Segoe UI Variable",
+            "Segoe UI Variable Text",
+            "Segoe UI Variable Text Light",
+            "Segoe UI Variable Text Semibold",
+            "Segoe UI Variable Display",
+            "Segoe UI Variable Display Light",
+            "Segoe UI Variable Display Semibold",
+            "Segoe UI Variable Small",
+            "Segoe UI Variable Small Light",
+            "Segoe UI Variable Small Semibold",
+            "Microsoft YaHei",
+            "Microsoft YaHei UI",
+            "Microsoft YaHei Light",
+            "Microsoft YaHei UI Light",
+            "Microsoft YaHei Semibold",
+            "Microsoft YaHei UI Semibold"
+        };
         private readonly string _backupRoot;
 
         public FontTunerService()
@@ -73,6 +99,30 @@ namespace WindowsFontTuner
             return backupPath;
         }
 
+        public string ResetToWindowsDefaults(bool rebuildFontCache, bool restartExplorer)
+        {
+            EnsureAdmin();
+
+            string backupPath = CreateBackup();
+            ResetFontSubstitutesToDefaults();
+            ResetDesktopTextSettingsToDefaults();
+            ResetRenderingSettingsToDefaults();
+            ResetWindowMetricsToDefaults();
+            RefreshSystemState(rebuildFontCache, restartExplorer);
+            return backupPath;
+        }
+
+        public void LaunchSystemFontRepair()
+        {
+            EnsureAdmin();
+
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.FileName = Path.Combine(Environment.SystemDirectory, "cmd.exe");
+            startInfo.Arguments = "/k title Windows 系统字体修复 && echo 正在运行 DISM 和 SFC，这个过程可能需要几分钟到十几分钟... && echo. && DISM.exe /Online /Cleanup-Image /RestoreHealth && echo. && echo DISM 完成，继续执行 sfc /scannow... && sfc /scannow";
+            startInfo.UseShellExecute = true;
+            Process.Start(startInfo);
+        }
+
         public string RestoreLatestBackup(bool rebuildFontCache, bool restartExplorer)
         {
             EnsureAdmin();
@@ -102,7 +152,7 @@ namespace WindowsFontTuner
 
             if (string.IsNullOrWhiteSpace(backupDirectory) || !Directory.Exists(backupDirectory))
             {
-                throw new DirectoryNotFoundException("鏈壘鍒板浠界洰褰曪細" + backupDirectory);
+                throw new DirectoryNotFoundException("未找到备份目录：" + backupDirectory);
             }
 
             ImportRegistry(Path.Combine(backupDirectory, "Fonts.reg"));
@@ -192,18 +242,31 @@ namespace WindowsFontTuner
 
         private void ApplyFontSubstitutes(Dictionary<string, string> values)
         {
-            if (values == null)
-            {
-                return;
-            }
-
             using (RegistryKey key = Registry.LocalMachine.CreateSubKey(FontSubstitutesPath))
             {
+                foreach (string valueName in ManagedFontSubstituteNames)
+                {
+                    key.DeleteValue(valueName, false);
+                }
+
+                if (values == null)
+                {
+                    return;
+                }
+
                 foreach (KeyValuePair<string, string> pair in values)
                 {
-                    key.SetValue(pair.Key, pair.Value, RegistryValueKind.String);
+                    if (!string.IsNullOrWhiteSpace(pair.Key) && !string.IsNullOrWhiteSpace(pair.Value))
+                    {
+                        key.SetValue(pair.Key, pair.Value, RegistryValueKind.String);
+                    }
                 }
             }
+        }
+
+        private void ResetFontSubstitutesToDefaults()
+        {
+            ApplyFontSubstitutes(null);
         }
 
         private void ApplyDesktopTextSettings(DesktopTextSettings settings)
@@ -249,6 +312,44 @@ namespace WindowsFontTuner
                         displayKey.SetValue("GammaLevel", settings.GammaLevel, RegistryValueKind.DWord);
                         displayKey.SetValue("ClearTypeLevel", settings.ClearTypeLevel, RegistryValueKind.DWord);
                         displayKey.SetValue("TextContrastLevel", settings.TextContrastLevel, RegistryValueKind.DWord);
+                    }
+                }
+            }
+        }
+
+        private void ResetDesktopTextSettingsToDefaults()
+        {
+            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(DesktopPath))
+            {
+                key.SetValue("FontSmoothing", "2", RegistryValueKind.String);
+                key.SetValue("FontSmoothingType", 2, RegistryValueKind.DWord);
+                key.SetValue("FontSmoothingGamma", 1900, RegistryValueKind.DWord);
+                key.SetValue("FontSmoothingOrientation", 1, RegistryValueKind.DWord);
+            }
+        }
+
+        private void ResetRenderingSettingsToDefaults()
+        {
+            using (RegistryKey root = Registry.CurrentUser.OpenSubKey(AvalonGraphicsPath, true))
+            {
+                if (root == null)
+                {
+                    return;
+                }
+
+                foreach (string name in root.GetSubKeyNames())
+                {
+                    using (RegistryKey displayKey = root.OpenSubKey(name, true))
+                    {
+                        if (displayKey == null)
+                        {
+                            continue;
+                        }
+
+                        displayKey.DeleteValue("PixelStructure", false);
+                        displayKey.DeleteValue("GammaLevel", false);
+                        displayKey.DeleteValue("ClearTypeLevel", false);
+                        displayKey.DeleteValue("TextContrastLevel", false);
                     }
                 }
             }
@@ -318,6 +419,49 @@ namespace WindowsFontTuner
             {
                 throw new InvalidOperationException("无法更新窗口字体参数。");
             }
+        }
+
+        private void ResetWindowMetricsToDefaults()
+        {
+            ApplyWindowMetrics(new WindowMetricsSettings
+            {
+                FaceName = GetDefaultWindowsUiFontName(),
+                Weight = 400,
+                Quality = 5
+            });
+        }
+
+        private string GetDefaultWindowsUiFontName()
+        {
+            HashSet<string> installedFamilies = new HashSet<string>(GetInstalledFamilies(), StringComparer.OrdinalIgnoreCase);
+            string cultureName = CultureInfo.InstalledUICulture.Name ?? string.Empty;
+
+            if (cultureName.StartsWith("zh", StringComparison.OrdinalIgnoreCase) && installedFamilies.Contains("Microsoft YaHei UI"))
+            {
+                return "Microsoft YaHei UI";
+            }
+
+            if (cultureName.StartsWith("ja", StringComparison.OrdinalIgnoreCase) && installedFamilies.Contains("Yu Gothic UI"))
+            {
+                return "Yu Gothic UI";
+            }
+
+            if (cultureName.StartsWith("ko", StringComparison.OrdinalIgnoreCase) && installedFamilies.Contains("Malgun Gothic"))
+            {
+                return "Malgun Gothic";
+            }
+
+            if (installedFamilies.Contains("Segoe UI"))
+            {
+                return "Segoe UI";
+            }
+
+            if (installedFamilies.Contains("Microsoft YaHei UI"))
+            {
+                return "Microsoft YaHei UI";
+            }
+
+            return SystemFonts.MessageBoxFont.FontFamily.Name;
         }
 
         private static void UpdateLogFont(ref NativeMethods.LOGFONT logFont, WindowMetricsSettings settings)
