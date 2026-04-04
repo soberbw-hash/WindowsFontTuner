@@ -1,17 +1,19 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
+using System.IO;
 using System.Windows.Forms;
 
 namespace WindowsFontTuner
 {
     internal static class UiPalette
     {
-        public static readonly Color WindowBackground = Color.FromArgb(242, 246, 251);
-        public static readonly Color SidebarBackground = Color.FromArgb(246, 249, 252);
+        public static readonly Color WindowBackground = Color.FromArgb(164, 242, 246, 251);
+        public static readonly Color SidebarBackground = Color.FromArgb(184, 246, 249, 252);
         public static readonly Color SidebarBorder = Color.FromArgb(225, 231, 239);
-        public static readonly Color CardBackground = Color.FromArgb(252, 253, 255);
-        public static readonly Color CardAltBackground = Color.FromArgb(247, 250, 253);
+        public static readonly Color CardBackground = Color.FromArgb(214, 252, 253, 255);
+        public static readonly Color CardAltBackground = Color.FromArgb(198, 247, 250, 253);
         public static readonly Color Border = Color.FromArgb(223, 229, 237);
         public static readonly Color BorderStrong = Color.FromArgb(210, 219, 230);
         public static readonly Color Accent = Color.FromArgb(37, 99, 235);
@@ -29,8 +31,99 @@ namespace WindowsFontTuner
         public static readonly Color WarningSoft = Color.FromArgb(255, 245, 229);
         public static readonly Color Danger = Color.FromArgb(188, 63, 63);
         public static readonly Color DangerSoft = Color.FromArgb(252, 238, 238);
-        public static readonly Color HeroStart = Color.FromArgb(238, 245, 255);
-        public static readonly Color HeroEnd = Color.FromArgb(250, 252, 255);
+        public static readonly Color HeroStart = Color.FromArgb(210, 238, 245, 255);
+        public static readonly Color HeroEnd = Color.FromArgb(196, 250, 252, 255);
+    }
+
+    internal static class UiTypography
+    {
+        private static readonly PrivateFontCollection PrivateFonts = new PrivateFontCollection();
+        private static FontFamily _family;
+        private static bool _initialized;
+
+        public static FontFamily Family
+        {
+            get
+            {
+                EnsureInitialized();
+                return _family;
+            }
+        }
+
+        public static string DefaultFamilyName
+        {
+            get { return Family.Name; }
+        }
+
+        public static void Initialize(string baseDirectory)
+        {
+            if (_initialized)
+            {
+                return;
+            }
+
+            _initialized = true;
+
+            try
+            {
+                string[] candidates =
+                {
+                    Path.Combine(baseDirectory, "FontPackages", "sarasa-ui-sc", "SarasaUiSC-Regular.ttf"),
+                    Path.Combine(baseDirectory, "FontPackages", "sarasa-ui-sc", "SarasaUiSC-SemiBold.ttf"),
+                    Path.Combine(baseDirectory, "FontPackages", "sarasa-ui-sc", "SarasaUiSC-Bold.ttf")
+                };
+
+                foreach (string candidate in candidates)
+                {
+                    if (File.Exists(candidate))
+                    {
+                        PrivateFonts.AddFontFile(candidate);
+                    }
+                }
+
+                if (PrivateFonts.Families.Length > 0)
+                {
+                    _family = PrivateFonts.Families[0];
+                }
+            }
+            catch
+            {
+            }
+
+            if (_family == null)
+            {
+                try
+                {
+                    _family = new FontFamily("Microsoft YaHei UI");
+                }
+                catch
+                {
+                    try
+                    {
+                        _family = new FontFamily("Segoe UI");
+                    }
+                    catch
+                    {
+                        _family = SystemFonts.MessageBoxFont.FontFamily;
+                    }
+                }
+            }
+        }
+
+        public static Font Create(float size, FontStyle style = FontStyle.Regular)
+        {
+            return new Font(Family, size, style, GraphicsUnit.Point);
+        }
+
+        private static void EnsureInitialized()
+        {
+            if (_initialized)
+            {
+                return;
+            }
+
+            Initialize(AppDomain.CurrentDomain.BaseDirectory);
+        }
     }
 
     internal static class UiGeometry
@@ -76,6 +169,7 @@ namespace WindowsFontTuner
         {
             DoubleBuffered = true;
             ResizeRedraw = true;
+            SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             BackColor = Color.Transparent;
             Padding = new Padding(20);
         }
@@ -261,7 +355,7 @@ namespace WindowsFontTuner
             DoubleBuffered = true;
             Height = 38;
             Width = 132;
-            Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.3f, FontStyle.Regular);
+            Font = UiTypography.Create(9.3f, FontStyle.Regular);
             ForeColor = UiPalette.TextPrimary;
             BackColor = Color.Transparent;
         }
@@ -404,7 +498,7 @@ namespace WindowsFontTuner
             DoubleBuffered = true;
             Height = 42;
             Width = 180;
-            Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.6f, FontStyle.Bold);
+            Font = UiTypography.Create(9.4f, FontStyle.Bold);
             ForeColor = UiPalette.TextSecondary;
             BackColor = Color.Transparent;
             TextAlign = ContentAlignment.MiddleLeft;

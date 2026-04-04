@@ -1,9 +1,9 @@
 {
-  "version": "0.5.0",
-  "tag": "v0.5.0",
-  "name": "Windows全局字体替换器 v0.5.0",
-  "releaseUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/tag/v0.5.0",
-  "downloadUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/download/v0.5.0/WindowsFontTuner-Setup-v0.5.0.exe",
-  "publishedAt": "2026-04-05T18:10:00Z",
-  "notes": "重做应用主界面，升级为多页面壳子结构，新增仪表盘、字体微调、设置与备份页，并支持按指定快照恢复。"
+  "version": "0.5.1",
+  "tag": "v0.5.1",
+  "name": "Windows全局字体替换器 v0.5.1",
+  "releaseUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/tag/v0.5.1",
+  "downloadUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/download/v0.5.1/WindowsFontTuner-Setup-v0.5.1.exe",
+  "publishedAt": "2026-04-05T18:45:00Z",
+  "notes": "修复新版壳子在高 DPI 和系统替换字体下的裁字问题，统一软件内 UI 字体，并补上更稳定的模糊背景效果。"
 }

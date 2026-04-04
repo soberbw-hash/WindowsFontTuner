@@ -88,13 +88,14 @@ namespace WindowsFontTuner
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
             DoubleBuffered = true;
             AutoScaleMode = AutoScaleMode.Dpi;
+            UiTypography.Initialize(AppDomain.CurrentDomain.BaseDirectory);
             Text = "Windows全局字体替换器";
             Width = 1420;
             Height = 920;
             MinimumSize = new Size(1180, 780);
             StartPosition = FormStartPosition.CenterScreen;
-            BackColor = UiPalette.WindowBackground;
-            Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.4f, FontStyle.Regular);
+            BackColor = Color.FromArgb(242, 246, 251);
+            Font = UiTypography.Create(9.2f, FontStyle.Regular);
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
 
             Controls.Add(BuildShell());
@@ -115,8 +116,8 @@ namespace WindowsFontTuner
 
             using (LinearGradientBrush brush = new LinearGradientBrush(
                 bounds,
-                Color.FromArgb(243, 247, 252),
-                Color.FromArgb(232, 240, 249),
+                Color.FromArgb(124, 243, 247, 252),
+                Color.FromArgb(108, 232, 240, 249),
                 90f))
             {
                 e.Graphics.FillRectangle(brush, bounds);
@@ -124,8 +125,8 @@ namespace WindowsFontTuner
 
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            using (SolidBrush coolBrush = new SolidBrush(Color.FromArgb(26, UiPalette.Accent)))
-            using (SolidBrush warmBrush = new SolidBrush(Color.FromArgb(18, 81, 136, 214)))
+            using (SolidBrush coolBrush = new SolidBrush(Color.FromArgb(16, UiPalette.Accent)))
+            using (SolidBrush warmBrush = new SolidBrush(Color.FromArgb(12, 81, 136, 214)))
             {
                 e.Graphics.FillEllipse(coolBrush, new Rectangle(Width - 360, -110, 380, 380));
                 e.Graphics.FillEllipse(warmBrush, new Rectangle(-150, Height - 310, 300, 300));
@@ -167,7 +168,7 @@ namespace WindowsFontTuner
             layout.BackColor = Color.Transparent;
             layout.ColumnCount = 1;
             layout.RowCount = 3;
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 106f));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 132f));
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 120f));
             sidebar.Controls.Add(layout);
@@ -209,21 +210,24 @@ namespace WindowsFontTuner
             host.Controls.Add(mark);
 
             Label title = new Label();
-            title.AutoSize = true;
+            title.AutoSize = false;
             title.BackColor = Color.Transparent;
-            title.Font = new Font(Font.FontFamily, 13.5f, FontStyle.Bold);
+            title.Font = new Font(Font.FontFamily, 11.4f, FontStyle.Bold);
             title.ForeColor = UiPalette.TextPrimary;
             title.Location = new Point(0, 70);
+            title.Size = new Size(176, 56);
+            title.UseCompatibleTextRendering = true;
             title.Text = "Windows全局字体替换器";
             host.Controls.Add(title);
 
             Label sub = new Label();
-            sub.AutoSize = true;
+            sub.AutoSize = false;
             sub.BackColor = Color.Transparent;
-            sub.Font = new Font(Font.FontFamily, 8.8f, FontStyle.Regular);
+            sub.Font = new Font(Font.FontFamily, 8.5f, FontStyle.Regular);
             sub.ForeColor = UiPalette.TextMuted;
-            sub.Location = new Point(0, 95);
-            sub.Text = "字体替换、渲染微调、备份与更新";
+            sub.Location = new Point(0, 118);
+            sub.Size = new Size(176, 22);
+            sub.Text = "替换 / 微调 / 备份 / 更新";
             host.Controls.Add(sub);
 
             return host;
@@ -330,6 +334,7 @@ namespace WindowsFontTuner
             _pageSubtitleLabel.Font = new Font(Font.FontFamily, 8.8f, FontStyle.Regular);
             _pageSubtitleLabel.ForeColor = UiPalette.TextMuted;
             _pageSubtitleLabel.Location = new Point(0, 28);
+            _pageSubtitleLabel.Visible = false;
             left.Controls.Add(_pageSubtitleLabel);
 
             FlowLayoutPanel right = new FlowLayoutPanel();
@@ -466,7 +471,7 @@ namespace WindowsFontTuner
             EventHandler resizeHandler = delegate
             {
                 int preferred = page.ClientSize.Width - page.Padding.Horizontal - 4;
-                layoutCanvas.Width = Math.Max(1020, preferred);
+                layoutCanvas.Width = Math.Max(900, preferred);
             };
 
             page.Resize += resizeHandler;
@@ -507,7 +512,7 @@ namespace WindowsFontTuner
             Label label = new Label();
             label.AutoSize = true;
             label.BackColor = Color.Transparent;
-            label.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 12.8f, FontStyle.Bold);
+            label.Font = UiTypography.Create(12.4f, FontStyle.Bold);
             label.ForeColor = UiPalette.TextPrimary;
             label.Text = text;
             return label;
@@ -518,7 +523,7 @@ namespace WindowsFontTuner
             Label label = new Label();
             label.AutoSize = true;
             label.BackColor = Color.Transparent;
-            label.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 8.6f, FontStyle.Bold);
+            label.Font = UiTypography.Create(8.5f, FontStyle.Bold);
             label.ForeColor = foreColor;
             label.Text = text;
             return label;
@@ -531,8 +536,10 @@ namespace WindowsFontTuner
             label.BackColor = Color.Transparent;
             label.Location = new Point(x, y);
             label.Size = new Size(width, height);
-            label.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.2f, FontStyle.Regular);
+            label.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            label.Font = UiTypography.Create(9f, FontStyle.Regular);
             label.ForeColor = UiPalette.TextSecondary;
+            label.UseCompatibleTextRendering = true;
             label.Text = text;
             return label;
         }
@@ -543,7 +550,7 @@ namespace WindowsFontTuner
             label.AutoSize = true;
             label.BackColor = backColor;
             label.ForeColor = foreColor;
-            label.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 8.6f, FontStyle.Bold);
+            label.Font = UiTypography.Create(8.4f, FontStyle.Bold);
             label.Padding = new Padding(10, 5, 10, 5);
             label.Text = text;
             return label;
@@ -553,7 +560,9 @@ namespace WindowsFontTuner
         {
             ModernButton button = new ModernButton();
             button.Text = text;
-            button.Width = width;
+            int measuredWidth = TextRenderer.MeasureText(text, button.Font).Width + 30;
+            button.Width = Math.Max(width, measuredWidth);
+            button.Height = 40;
             button.ButtonStyle = style;
             button.CornerRadius = 12;
             button.Margin = new Padding(0, 0, 8, 8);
@@ -578,7 +587,8 @@ namespace WindowsFontTuner
         {
             ModernCardPanel hero = CreateCard(true, 32, UiPalette.CardBackground);
             hero.ShowGlow = true;
-            hero.Height = 212;
+            hero.Dock = DockStyle.Top;
+            hero.Height = 236;
             hero.Margin = new Padding(0, 0, 0, 18);
             hero.Padding = new Padding(26, 22, 26, 22);
 
@@ -600,31 +610,34 @@ namespace WindowsFontTuner
             title.AutoSize = false;
             title.BackColor = Color.Transparent;
             title.Location = new Point(0, 0);
-            title.Size = new Size(560, 72);
-            title.Font = new Font(Font.FontFamily, 25f, FontStyle.Bold);
+            title.Size = new Size(520, 76);
+            title.Font = new Font(Font.FontFamily, 17.2f, FontStyle.Bold);
+            title.UseCompatibleTextRendering = true;
             title.ForeColor = UiPalette.TextPrimary;
-            title.Text = "把 Windows 默认字体换成你真正想看的样子";
+            title.Text = "把系统字体换成你真正想看的样子";
             left.Controls.Add(title);
 
             _dashboardHeroSupportLabel = new Label();
             _dashboardHeroSupportLabel.AutoSize = false;
             _dashboardHeroSupportLabel.BackColor = Color.Transparent;
             _dashboardHeroSupportLabel.Location = new Point(0, 82);
-            _dashboardHeroSupportLabel.Size = new Size(560, 48);
-            _dashboardHeroSupportLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Regular);
+            _dashboardHeroSupportLabel.Size = new Size(520, 44);
+            _dashboardHeroSupportLabel.Font = new Font(Font.FontFamily, 9.4f, FontStyle.Regular);
             _dashboardHeroSupportLabel.ForeColor = UiPalette.TextSecondary;
-            _dashboardHeroSupportLabel.Text = "内置三套字体，一键安装、备份、恢复、检查更新。";
+            _dashboardHeroSupportLabel.Text = "内置三套字体，支持一键安装、备份、恢复和检查更新。";
+            _dashboardHeroSupportLabel.UseCompatibleTextRendering = true;
             left.Controls.Add(_dashboardHeroSupportLabel);
 
             _dashboardVersionBadgeLabel = CreateBadgeLabel("当前版本", UiPalette.AccentSoft, UiPalette.AccentTextSoft);
-            _dashboardVersionBadgeLabel.Location = new Point(0, 138);
+            _dashboardVersionBadgeLabel.Location = new Point(0, 136);
             left.Controls.Add(_dashboardVersionBadgeLabel);
 
             FlowLayoutPanel heroActions = new FlowLayoutPanel();
             heroActions.AutoSize = true;
             heroActions.BackColor = Color.Transparent;
-            heroActions.Location = new Point(0, 172);
-            heroActions.WrapContents = false;
+            heroActions.Location = new Point(0, 174);
+            heroActions.MaximumSize = new Size(520, 0);
+            heroActions.WrapContents = true;
             left.Controls.Add(heroActions);
 
             ModernButton goReplacementButton = BuildButton("去字体替换", delegate { ShowPage(AppPage.Replacement); }, ModernButtonStyle.Primary, 118);
@@ -652,17 +665,19 @@ namespace WindowsFontTuner
             _dashboardUpdateStatusLabel.AutoSize = false;
             _dashboardUpdateStatusLabel.BackColor = Color.Transparent;
             _dashboardUpdateStatusLabel.Location = new Point(0, 32);
-            _dashboardUpdateStatusLabel.Size = new Size(360, 60);
-            _dashboardUpdateStatusLabel.Font = new Font(Font.FontFamily, 10.2f, FontStyle.Regular);
+            _dashboardUpdateStatusLabel.Size = new Size(330, 60);
+            _dashboardUpdateStatusLabel.Font = new Font(Font.FontFamily, 9.8f, FontStyle.Regular);
             _dashboardUpdateStatusLabel.ForeColor = UiPalette.TextSecondary;
             _dashboardUpdateStatusLabel.Text = "启动后会自动检查更新，也可以手动点按钮查看。";
+            _dashboardUpdateStatusLabel.UseCompatibleTextRendering = true;
             right.Controls.Add(_dashboardUpdateStatusLabel);
 
             FlowLayoutPanel updateActions = new FlowLayoutPanel();
             updateActions.AutoSize = true;
             updateActions.BackColor = Color.Transparent;
             updateActions.Location = new Point(0, 98);
-            updateActions.WrapContents = false;
+            updateActions.MaximumSize = new Size(330, 0);
+            updateActions.WrapContents = true;
             right.Controls.Add(updateActions);
 
             _checkUpdatesButton = BuildButton("检查更新", CheckUpdatesButton_Click, ModernButtonStyle.Primary, 102);
@@ -678,7 +693,7 @@ namespace WindowsFontTuner
             _openDownloadButton.Visible = false;
             updateActions.Controls.Add(_openDownloadButton);
 
-            Label note = CreateMutedLabel("更新逻辑优先走公开的 version.json，其次回退 GitHub Release。", 0, 150, 360, 40);
+            Label note = CreateMutedLabel("更新优先读取公开 version.json，失败后再回退 GitHub Release。", 0, 160, 330, 38);
             note.Font = new Font(Font.FontFamily, 8.8f, FontStyle.Regular);
             note.ForeColor = UiPalette.TextMuted;
             right.Controls.Add(note);
@@ -688,7 +703,7 @@ namespace WindowsFontTuner
 
         private Control BuildDashboardStatsRow()
         {
-            TableLayoutPanel row = CreateSplitRow(4, 112);
+            TableLayoutPanel row = CreateSplitRow(4, 124);
             row.Margin = new Padding(0, 0, 0, 18);
 
             row.Controls.Add(CreateStatCard("当前预设", "正在准备应用的字体方案", out _dashboardPresetValueLabel, UiPalette.AccentSoft, UiPalette.AccentTextSoft), 0, 0);
@@ -735,7 +750,8 @@ namespace WindowsFontTuner
             sampleCard.ShowShadow = false;
             sampleCard.BorderColor = UiPalette.Border;
             sampleCard.Location = new Point(22, 88);
-            sampleCard.Size = new Size(570, 178);
+            sampleCard.Size = new Size(570, 190);
+            sampleCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             sampleCard.Padding = new Padding(18);
             card.Controls.Add(sampleCard);
 
@@ -743,23 +759,25 @@ namespace WindowsFontTuner
             _dashboardPreviewTitleLabel.AutoSize = false;
             _dashboardPreviewTitleLabel.BackColor = Color.Transparent;
             _dashboardPreviewTitleLabel.Location = new Point(18, 18);
-            _dashboardPreviewTitleLabel.Size = new Size(530, 44);
-            _dashboardPreviewTitleLabel.Font = new Font(Font.FontFamily, 20f, FontStyle.Bold);
+            _dashboardPreviewTitleLabel.Size = new Size(530, 52);
+            _dashboardPreviewTitleLabel.Font = new Font(Font.FontFamily, 18f, FontStyle.Bold);
             _dashboardPreviewTitleLabel.ForeColor = UiPalette.TextPrimary;
             _dashboardPreviewTitleLabel.Text = "敏捷的棕色狐狸 0123456789";
+            _dashboardPreviewTitleLabel.UseCompatibleTextRendering = true;
             sampleCard.Controls.Add(_dashboardPreviewTitleLabel);
 
             _dashboardPreviewBodyLabel = new Label();
             _dashboardPreviewBodyLabel.AutoSize = false;
             _dashboardPreviewBodyLabel.BackColor = Color.Transparent;
-            _dashboardPreviewBodyLabel.Location = new Point(18, 72);
-            _dashboardPreviewBodyLabel.Size = new Size(530, 58);
-            _dashboardPreviewBodyLabel.Font = new Font(Font.FontFamily, 10.5f, FontStyle.Regular);
+            _dashboardPreviewBodyLabel.Location = new Point(18, 78);
+            _dashboardPreviewBodyLabel.Size = new Size(530, 64);
+            _dashboardPreviewBodyLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Regular);
             _dashboardPreviewBodyLabel.ForeColor = UiPalette.TextSecondary;
             _dashboardPreviewBodyLabel.Text = "Aa The quick brown fox jumps over the lazy dog.\r\n资源管理器、桌面图标和常见正文区域都更容易对比。";
+            _dashboardPreviewBodyLabel.UseCompatibleTextRendering = true;
             sampleCard.Controls.Add(_dashboardPreviewBodyLabel);
 
-            _dashboardPreviewMetaLabel = CreateMutedLabel("", 18, 136, 530, 22);
+            _dashboardPreviewMetaLabel = CreateMutedLabel("", 18, 148, 530, 24);
             _dashboardPreviewMetaLabel.Font = new Font(Font.FontFamily, 8.8f, FontStyle.Bold);
             _dashboardPreviewMetaLabel.ForeColor = UiPalette.TextMuted;
             sampleCard.Controls.Add(_dashboardPreviewMetaLabel);
@@ -786,15 +804,18 @@ namespace WindowsFontTuner
             _dashboardPackageNoteLabel.BackColor = Color.Transparent;
             _dashboardPackageNoteLabel.Location = new Point(22, 54);
             _dashboardPackageNoteLabel.Size = new Size(360, 88);
+            _dashboardPackageNoteLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _dashboardPackageNoteLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Regular);
             _dashboardPackageNoteLabel.ForeColor = UiPalette.TextSecondary;
             _dashboardPackageNoteLabel.Text = "当前预设对应的字体包信息会显示在这里。";
+            _dashboardPackageNoteLabel.UseCompatibleTextRendering = true;
             card.Controls.Add(_dashboardPackageNoteLabel);
 
             FlowLayoutPanel actions = new FlowLayoutPanel();
             actions.AutoSize = true;
             actions.BackColor = Color.Transparent;
             actions.Location = new Point(22, 150);
+            actions.MaximumSize = new Size(360, 0);
             actions.WrapContents = true;
             card.Controls.Add(actions);
 
@@ -814,6 +835,7 @@ namespace WindowsFontTuner
             tips.ShowShadow = false;
             tips.Location = new Point(22, 220);
             tips.Size = new Size(360, 82);
+            tips.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             tips.Padding = new Padding(16);
             card.Controls.Add(tips);
 
@@ -848,7 +870,7 @@ namespace WindowsFontTuner
 
             TableLayoutPanel topRow = new TableLayoutPanel();
             topRow.Dock = DockStyle.Top;
-            topRow.Height = 466;
+            topRow.Height = 492;
             topRow.Margin = new Padding(0, 0, 0, 18);
             topRow.BackColor = Color.Transparent;
             topRow.ColumnCount = 2;
@@ -914,6 +936,7 @@ namespace WindowsFontTuner
             actions.AutoSize = true;
             actions.BackColor = Color.Transparent;
             actions.Location = new Point(22, 250);
+            actions.MaximumSize = new Size(560, 0);
             actions.WrapContents = true;
             card.Controls.Add(actions);
 
@@ -980,6 +1003,7 @@ namespace WindowsFontTuner
             packageCard.ShowShadow = false;
             packageCard.Location = new Point(22, 172);
             packageCard.Size = new Size(388, 186);
+            packageCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             packageCard.Padding = new Padding(16);
             card.Controls.Add(packageCard);
 
@@ -995,6 +1019,7 @@ namespace WindowsFontTuner
             resources.AutoSize = true;
             resources.BackColor = Color.Transparent;
             resources.Location = new Point(22, 374);
+            resources.MaximumSize = new Size(388, 0);
             resources.WrapContents = true;
             card.Controls.Add(resources);
 
@@ -1008,6 +1033,7 @@ namespace WindowsFontTuner
         private Control BuildMappingCard()
         {
             ModernCardPanel card = CreateCard(false, 28, UiPalette.CardBackground);
+            card.Dock = DockStyle.Top;
             card.Height = 328;
             card.Margin = new Padding(0, 0, 0, 12);
             card.Padding = new Padding(22);
@@ -1022,6 +1048,7 @@ namespace WindowsFontTuner
             _mappingFlow = new FlowLayoutPanel();
             _mappingFlow.Location = new Point(22, 92);
             _mappingFlow.Size = new Size(1050, 210);
+            _mappingFlow.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _mappingFlow.AutoScroll = true;
             _mappingFlow.WrapContents = true;
             _mappingFlow.BackColor = Color.Transparent;
@@ -1162,7 +1189,7 @@ namespace WindowsFontTuner
 
             TableLayoutPanel topRow = new TableLayoutPanel();
             topRow.Dock = DockStyle.Top;
-            topRow.Height = 336;
+            topRow.Height = 352;
             topRow.Margin = new Padding(0, 0, 0, 18);
             topRow.BackColor = Color.Transparent;
             topRow.ColumnCount = 2;
@@ -1259,6 +1286,7 @@ namespace WindowsFontTuner
             actions.AutoSize = true;
             actions.BackColor = Color.Transparent;
             actions.Location = new Point(22, 96);
+            actions.MaximumSize = new Size(360, 0);
             actions.WrapContents = true;
             card.Controls.Add(actions);
 
@@ -1271,6 +1299,7 @@ namespace WindowsFontTuner
             noteCard.ShowShadow = false;
             noteCard.Location = new Point(22, 164);
             noteCard.Size = new Size(360, 132);
+            noteCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             noteCard.Padding = new Padding(16);
             card.Controls.Add(noteCard);
 
@@ -1292,6 +1321,7 @@ namespace WindowsFontTuner
         private Control BuildBackupsCard()
         {
             ModernCardPanel card = CreateCard(false, 28, UiPalette.CardBackground);
+            card.Dock = DockStyle.Top;
             card.Height = 310;
             card.Margin = new Padding(0, 0, 0, 18);
             card.Padding = new Padding(22);
@@ -1307,7 +1337,8 @@ namespace WindowsFontTuner
             actions.AutoSize = true;
             actions.BackColor = Color.Transparent;
             actions.Location = new Point(22, 88);
-            actions.WrapContents = false;
+            actions.MaximumSize = new Size(800, 0);
+            actions.WrapContents = true;
             card.Controls.Add(actions);
 
             actions.Controls.Add(BuildButton("新建备份", BackupButton_Click, ModernButtonStyle.Primary, 98));
@@ -1316,6 +1347,7 @@ namespace WindowsFontTuner
             _backupListPanel = new FlowLayoutPanel();
             _backupListPanel.Location = new Point(22, 140);
             _backupListPanel.Size = new Size(1048, 146);
+            _backupListPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _backupListPanel.AutoScroll = true;
             _backupListPanel.WrapContents = false;
             _backupListPanel.FlowDirection = FlowDirection.TopDown;
@@ -1329,6 +1361,7 @@ namespace WindowsFontTuner
         private Control BuildLogCard()
         {
             ModernCardPanel card = CreateCard(false, 28, UiPalette.CardBackground);
+            card.Dock = DockStyle.Top;
             card.Height = 242;
             card.Margin = new Padding(0, 0, 0, 12);
             card.Padding = new Padding(22);
@@ -1342,6 +1375,7 @@ namespace WindowsFontTuner
 
             _clearLogButton = BuildButton("清空日志", ClearLogButton_Click, ModernButtonStyle.Ghost, 92);
             _clearLogButton.Location = new Point(972, 16);
+            _clearLogButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _clearLogButton.Margin = new Padding(0);
             card.Controls.Add(_clearLogButton);
 
@@ -1349,6 +1383,7 @@ namespace WindowsFontTuner
             logSurface.ShowShadow = false;
             logSurface.Location = new Point(22, 88);
             logSurface.Size = new Size(1048, 132);
+            logSurface.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             logSurface.Padding = new Padding(12);
             card.Controls.Add(logSurface);
 
@@ -1398,12 +1433,12 @@ namespace WindowsFontTuner
             badge.Location = new Point(16, 14);
             card.Controls.Add(badge);
 
-            valueLabel = CreateMutedLabel("--", 16, 48, 190, 30);
-            valueLabel.Font = new Font(Font.FontFamily, 17f, FontStyle.Bold);
+            valueLabel = CreateMutedLabel("--", 16, 48, 190, 34);
+            valueLabel.Font = new Font(Font.FontFamily, 13.8f, FontStyle.Bold);
             valueLabel.ForeColor = UiPalette.TextPrimary;
             card.Controls.Add(valueLabel);
 
-            Label note = CreateMutedLabel(noteText, 16, 80, 190, 18);
+            Label note = CreateMutedLabel(noteText, 16, 86, 190, 26);
             card.Controls.Add(note);
 
             return card;
@@ -1420,8 +1455,8 @@ namespace WindowsFontTuner
             title.Location = new Point(14, 14);
             card.Controls.Add(title);
 
-            valueLabel = CreateMutedLabel("--", 14, 40, 150, 34);
-            valueLabel.Font = new Font(Font.FontFamily, 13f, FontStyle.Bold);
+            valueLabel = CreateMutedLabel("--", 14, 40, 150, 42);
+            valueLabel.Font = new Font(Font.FontFamily, 12.2f, FontStyle.Bold);
             valueLabel.ForeColor = UiPalette.TextPrimary;
             card.Controls.Add(valueLabel);
 
@@ -1439,8 +1474,8 @@ namespace WindowsFontTuner
             title.Location = new Point(16, 12);
             pane.Controls.Add(title);
 
-            bodyLabel = CreateMutedLabel("敏捷的棕色狐狸跳过懒狗。\r\nAa 0123456789\r\nThe quick brown fox.", 16, 40, 250, 180);
-            bodyLabel.Font = new Font(Font.FontFamily, 16f, emphasize ? FontStyle.Bold : FontStyle.Regular);
+            bodyLabel = CreateMutedLabel("敏捷的棕色狐狸跳过懒狗。\r\nAa 0123456789\r\nThe quick brown fox.", 16, 40, 250, 186);
+            bodyLabel.Font = new Font(Font.FontFamily, 14.8f, emphasize ? FontStyle.Bold : FontStyle.Regular);
             bodyLabel.ForeColor = UiPalette.TextPrimary;
             pane.Controls.Add(bodyLabel);
 
@@ -1451,20 +1486,20 @@ namespace WindowsFontTuner
         {
             Panel intro = new Panel();
             intro.Dock = DockStyle.Top;
-            intro.Height = 76;
+            intro.Height = 88;
             intro.Margin = new Padding(0, 0, 0, 18);
             intro.BackColor = Color.Transparent;
 
             Label title = new Label();
             title.AutoSize = true;
             title.BackColor = Color.Transparent;
-            title.Font = new Font(Font.FontFamily, 24f, FontStyle.Bold);
+            title.Font = new Font(Font.FontFamily, 20f, FontStyle.Bold);
             title.ForeColor = UiPalette.TextPrimary;
             title.Location = new Point(0, 0);
             title.Text = titleText;
             intro.Controls.Add(title);
 
-            Label sub = CreateMutedLabel(description, 0, 42, 760, 24);
+            Label sub = CreateMutedLabel(description, 0, 46, 900, 28);
             intro.Controls.Add(sub);
 
             return intro;
@@ -1707,9 +1742,11 @@ namespace WindowsFontTuner
 
         private void RefreshDashboard(FontPreset preset, FontPackage package, IList<string> missingFonts)
         {
+            string compactPresetName = GetCompactPresetName(preset);
+
             if (_dashboardPresetValueLabel != null)
             {
-                _dashboardPresetValueLabel.Text = SafeText(preset.Name, "未命名预设");
+                _dashboardPresetValueLabel.Text = compactPresetName;
             }
 
             if (_dashboardMissingValueLabel != null)
@@ -1721,14 +1758,14 @@ namespace WindowsFontTuner
             if (_dashboardHeroSupportLabel != null)
             {
                 _dashboardHeroSupportLabel.Text =
-                    "当前选中「" + SafeText(preset.Name, "未命名预设") + "」，" +
+                    "当前选中「" + compactPresetName + "」，" +
                     (missingFonts.Count == 0 ? "字体已经齐了，可以直接应用。" : "还缺 " + missingFonts.Count + " 款字体，建议先安装后再应用。");
             }
 
             if (_dashboardPreviewTitleLabel != null)
             {
                 _dashboardPreviewTitleLabel.Text = "敏捷的棕色狐狸 0123456789";
-                _dashboardPreviewTitleLabel.Font = CreatePreviewFont(preset, 20.5f);
+                _dashboardPreviewTitleLabel.Font = CreatePreviewFont(preset, 17.6f);
             }
 
             if (_dashboardPreviewBodyLabel != null)
@@ -1736,7 +1773,7 @@ namespace WindowsFontTuner
                 _dashboardPreviewBodyLabel.Text =
                     "Aa The quick brown fox jumps over the lazy dog." + Environment.NewLine +
                     "资源管理器、桌面图标和常见正文区域都会尽量往同一套风格靠。";
-                _dashboardPreviewBodyLabel.Font = CreatePreviewFont(preset, 10.8f, false);
+                _dashboardPreviewBodyLabel.Font = CreatePreviewFont(preset, 10.2f, false);
             }
 
             if (_dashboardPreviewMetaLabel != null)
@@ -1844,7 +1881,7 @@ namespace WindowsFontTuner
 
             if (_renderCurrentBodyLabel != null)
             {
-                _renderCurrentBodyLabel.Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 15.5f, FontStyle.Regular);
+                _renderCurrentBodyLabel.Font = UiTypography.Create(14.8f, FontStyle.Regular);
                 _renderCurrentBodyLabel.Text = "敏捷的棕色狐狸跳过懒狗。\r\nAa 0123456789\r\nThe quick brown fox.";
             }
 
@@ -2201,6 +2238,13 @@ namespace WindowsFontTuner
             return string.IsNullOrWhiteSpace(value) ? fallback : value;
         }
 
+        private static string GetCompactPresetName(FontPreset preset)
+        {
+            string name = SafeText(preset == null ? null : preset.Name, "未命名预设");
+            name = name.Replace("统一预设", string.Empty).Trim();
+            return name.Length == 0 ? "未命名预设" : name;
+        }
+
         private Font CreatePreviewFont(FontPreset preset, float size)
         {
             return CreatePreviewFont(preset, size, true);
@@ -2210,7 +2254,7 @@ namespace WindowsFontTuner
         {
             string faceName = preset != null && preset.WindowMetrics != null
                 ? preset.WindowMetrics.FaceName
-                : SystemFonts.MessageBoxFont.FontFamily.Name;
+                : UiTypography.DefaultFamilyName;
             FontStyle style = allowBold && preset != null && preset.WindowMetrics != null && preset.WindowMetrics.Weight >= 550
                 ? FontStyle.Bold
                 : FontStyle.Regular;
@@ -2221,7 +2265,7 @@ namespace WindowsFontTuner
             }
             catch
             {
-                return new Font(SystemFonts.MessageBoxFont.FontFamily, size, style);
+                return UiTypography.Create(size, style);
             }
         }
 
@@ -2577,12 +2621,54 @@ namespace WindowsFontTuner
 
             try
             {
-                int backdrop = NativeMethods.DWMSBT_TRANSIENTWINDOW;
+                int backdrop = NativeMethods.DWMSBT_MAINWINDOW;
                 NativeMethods.DwmSetWindowAttribute(
                     Handle,
                     NativeMethods.DWMWA_SYSTEMBACKDROP_TYPE,
                     ref backdrop,
                     Marshal.SizeOf(typeof(int)));
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                int useHostBackdropBrush = 1;
+                NativeMethods.DwmSetWindowAttribute(
+                    Handle,
+                    NativeMethods.DWMWA_USE_HOSTBACKDROPBRUSH,
+                    ref useHostBackdropBrush,
+                    Marshal.SizeOf(typeof(int)));
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                NativeMethods.AccentPolicy accent = new NativeMethods.AccentPolicy();
+                accent.AccentState = NativeMethods.ACCENT_ENABLE_ACRYLICBLURBEHIND;
+                accent.GradientColor = NativeMethods.ToAbgr(Color.FromArgb(118, 245, 248, 252));
+
+                int accentStructSize = Marshal.SizeOf(accent);
+                IntPtr accentPtr = Marshal.AllocHGlobal(accentStructSize);
+
+                try
+                {
+                    Marshal.StructureToPtr(accent, accentPtr, false);
+
+                    NativeMethods.WindowCompositionAttributeData data = new NativeMethods.WindowCompositionAttributeData();
+                    data.Attribute = NativeMethods.WCA_ACCENT_POLICY;
+                    data.SizeOfData = accentStructSize;
+                    data.Data = accentPtr;
+
+                    NativeMethods.SetWindowCompositionAttribute(Handle, ref data);
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(accentPtr);
+                }
             }
             catch
             {
@@ -2599,13 +2685,42 @@ namespace WindowsFontTuner
 
         private static class NativeMethods
         {
+            public const int DWMWA_USE_HOSTBACKDROPBRUSH = 17;
             public const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
             public const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
             public const int DWMWCP_ROUND = 2;
+            public const int DWMSBT_MAINWINDOW = 2;
             public const int DWMSBT_TRANSIENTWINDOW = 3;
+            public const int WCA_ACCENT_POLICY = 19;
+            public const int ACCENT_ENABLE_ACRYLICBLURBEHIND = 4;
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct AccentPolicy
+            {
+                public int AccentState;
+                public int AccentFlags;
+                public int GradientColor;
+                public int AnimationId;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct WindowCompositionAttributeData
+            {
+                public int Attribute;
+                public IntPtr Data;
+                public int SizeOfData;
+            }
 
             [DllImport("dwmapi.dll")]
             public static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
+
+            [DllImport("user32.dll")]
+            public static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
+
+            public static int ToAbgr(Color color)
+            {
+                return (color.A << 24) | (color.B << 16) | (color.G << 8) | color.R;
+            }
         }
     }
 }
