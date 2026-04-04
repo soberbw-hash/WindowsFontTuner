@@ -2,6 +2,11 @@
 
 `Windows全局字体替换器` 是一个面向普通用户的小工具，用来备份、应用和恢复 Windows 全局字体替换预设。
 
+现在同时提供两种发布形式：
+
+- `zip` 便携版：适合已经习惯自己解压运行的人
+- `Setup.exe` 安装版：适合直接双击安装的小白用户
+
 这一版开始，软件里直接附带了三套可安装字体包，下载后不需要再自己上网找字体：
 
 - `HarmonyOS Sans SC`
@@ -76,11 +81,12 @@
 
 ## 使用方法
 
-1. 右键运行 `WindowsFontTuner.exe`，选择“以管理员身份运行”。
-2. 在下拉框里选择一个预设。
-3. 先点“安装预设字体”。
-4. 再点“应用当前预设”。
-5. 如果不满意，可以点“恢复最近备份”。
+1. 如果你下载的是 `Setup.exe`，直接双击安装即可，安装后会自动创建桌面和开始菜单快捷方式。
+2. 如果你下载的是 `zip` 便携版，解压后右键运行 `WindowsFontTuner.exe`，选择“以管理员身份运行”。
+3. 在下拉框里选择一个预设。
+4. 先点“安装所需字体”。
+5. 再点“应用当前预设”。
+6. 如果不满意，可以点“恢复最近备份”。
 
 ## 构建方法
 
@@ -96,6 +102,12 @@ build.bat
 
 ```text
 bin\Release\WindowsFontTuner.exe
+```
+
+如果要一次生成 `zip` 便携包和 `Setup.exe` 安装包，可以运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\Build-Packages.ps1 -Version 0.4.4
 ```
 
 ## 自定义预设
@@ -122,6 +134,12 @@ bin\Release\WindowsFontTuner.exe
 ```bat
 git remote add origin https://github.com/<your-name>/WindowsFontTuner.git
 git push -u origin main
+```
+
+如果你已经配置好了 GitHub 凭据，也可以直接用内置脚本更新 release：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 0.4.4 -AssetPaths .\dist\WindowsFontTuner-v0.4.4-win64.zip,.\dist\WindowsFontTuner-Setup-v0.4.4.exe
 ```
 
 ## 说明

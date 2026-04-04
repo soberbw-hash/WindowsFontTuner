@@ -8,6 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>WindowsFontTuner</RootNamespace>
     <AssemblyName>WindowsFontTuner</AssemblyName>
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -71,6 +72,7 @@
     <Content Include="字体授权说明.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Assets\AppIcon.ico" />
     <None Include="app.manifest" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

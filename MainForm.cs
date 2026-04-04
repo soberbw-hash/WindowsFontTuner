@@ -55,6 +55,7 @@ namespace WindowsFontTuner
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = UiPalette.WindowBackground;
             Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.25f, FontStyle.Regular);
+            Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
 
             TableLayoutPanel shell = new TableLayoutPanel();
             shell.Dock = DockStyle.Fill;
