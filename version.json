@@ -1,9 +1,9 @@
 {
-  "version": "0.4.2",
-  "tag": "v0.4.2",
-  "name": "Windows字体调谐器 v0.4.2",
-  "releaseUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/tag/v0.4.2",
-  "downloadUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/download/v0.4.2/WindowsFontTuner-v0.4.2-win64.zip",
-  "publishedAt": "2026-04-04T12:10:00Z",
-  "notes": "修正顶部标题区和管理员提示被裁切的问题，并把检查更新切到更稳定的公开版本文件。"
+  "version": "0.4.3",
+  "tag": "v0.4.3",
+  "name": "Windows全局字体替换器 v0.4.3",
+  "releaseUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/tag/v0.4.3",
+  "downloadUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/download/v0.4.3/WindowsFontTuner-v0.4.3-win64.zip",
+  "publishedAt": "2026-04-04T12:40:00Z",
+  "notes": "将软件名称统一为 Windows全局字体替换器，删除顶部冗余简介并重排主界面布局，修正标题区和状态卡片在高 DPI 下的裁切问题。"
 }

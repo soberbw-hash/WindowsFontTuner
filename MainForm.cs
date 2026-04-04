@@ -48,23 +48,23 @@ namespace WindowsFontTuner
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
             DoubleBuffered = true;
             AutoScaleMode = AutoScaleMode.Dpi;
-            Text = "Windows字体调谐器";
-            Width = 1120;
-            Height = 820;
-            MinimumSize = new Size(940, 680);
+            Text = "Windows全局字体替换器";
+            Width = 1180;
+            Height = 920;
+            MinimumSize = new Size(1040, 760);
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = UiPalette.WindowBackground;
             Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.25f, FontStyle.Regular);
 
             TableLayoutPanel shell = new TableLayoutPanel();
             shell.Dock = DockStyle.Fill;
-            shell.Padding = new Padding(24);
+            shell.Padding = new Padding(20);
             shell.BackColor = Color.Transparent;
             shell.ColumnCount = 1;
             shell.RowCount = 3;
-            shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 196f));
+            shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 152f));
             shell.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
-            shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 224f));
+            shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 108f));
             Controls.Add(shell);
 
             shell.Controls.Add(BuildHeroCard(), 0, 0);
@@ -111,16 +111,16 @@ namespace WindowsFontTuner
             hero.UseGradient = true;
             hero.ShowGlow = true;
             hero.CornerRadius = 34;
-            hero.Padding = new Padding(28, 20, 28, 20);
-            hero.Margin = new Padding(0, 0, 0, 18);
+            hero.Padding = new Padding(28, 18, 28, 18);
+            hero.Margin = new Padding(0, 0, 0, 12);
 
             TableLayoutPanel layout = new TableLayoutPanel();
             layout.Dock = DockStyle.Fill;
             layout.BackColor = Color.Transparent;
             layout.ColumnCount = 2;
             layout.RowCount = 1;
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 56f));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44f));
             hero.Controls.Add(layout);
 
             Panel left = new Panel();
@@ -131,10 +131,12 @@ namespace WindowsFontTuner
             Label title = new Label();
             title.AutoSize = true;
             title.BackColor = Color.Transparent;
-            title.Font = new Font(Font.FontFamily, 20f, FontStyle.Bold);
+            title.Font = new Font(Font.FontFamily, 18.5f, FontStyle.Bold);
             title.ForeColor = UiPalette.TextPrimary;
             title.Text = "把 Windows 字体调成更舒服的样子";
-            title.Location = new Point(0, 0);
+            title.MaximumSize = new Size(540, 0);
+            title.Location = new Point(0, 2);
+            title.Text = Text;
             left.Controls.Add(title);
 
             _heroSubtitleLabel = new Label();
@@ -142,8 +144,9 @@ namespace WindowsFontTuner
             _heroSubtitleLabel.BackColor = Color.Transparent;
             _heroSubtitleLabel.ForeColor = UiPalette.TextSecondary;
             _heroSubtitleLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Regular);
-            _heroSubtitleLabel.Location = new Point(0, 46);
-            _heroSubtitleLabel.Size = new Size(520, 68);
+            _heroSubtitleLabel.Location = new Point(0, 42);
+            _heroSubtitleLabel.Size = new Size(560, 46);
+            _heroSubtitleLabel.Visible = false;
             _heroSubtitleLabel.Text =
                 "内置三套可直接安装的字体包，也支持一键备份、恢复、应用预设。" + Environment.NewLine +
                 "这一版还加了更圆润的界面和本地检查更新，别人装完软件后也能看到新版本提示。";
@@ -154,8 +157,8 @@ namespace WindowsFontTuner
             _versionBadgeLabel.BackColor = UiPalette.AccentSoft;
             _versionBadgeLabel.ForeColor = UiPalette.Accent;
             _versionBadgeLabel.Font = new Font(Font.FontFamily, 9f, FontStyle.Bold);
-            _versionBadgeLabel.Padding = new Padding(12, 6, 12, 6);
-            _versionBadgeLabel.Location = new Point(0, 104);
+            _versionBadgeLabel.Padding = new Padding(12, 5, 12, 5);
+            _versionBadgeLabel.Location = new Point(0, 56);
             left.Controls.Add(_versionBadgeLabel);
 
             Panel right = new Panel();
@@ -169,15 +172,15 @@ namespace WindowsFontTuner
             updateTitle.Font = new Font(Font.FontFamily, 10.5f, FontStyle.Bold);
             updateTitle.ForeColor = UiPalette.TextPrimary;
             updateTitle.Text = "版本与更新";
-            updateTitle.Location = new Point(0, 2);
+            updateTitle.Location = new Point(0, 0);
             right.Controls.Add(updateTitle);
 
             _updateStatusLabel = new Label();
             _updateStatusLabel.AutoSize = false;
             _updateStatusLabel.BackColor = Color.Transparent;
             _updateStatusLabel.ForeColor = UiPalette.TextSecondary;
-            _updateStatusLabel.Location = new Point(0, 32);
-            _updateStatusLabel.Size = new Size(360, 42);
+            _updateStatusLabel.Location = new Point(0, 28);
+            _updateStatusLabel.Size = new Size(360, 36);
             _updateStatusLabel.Text = "启动后会自动检查 GitHub Release，也可以手动点按钮立即检查。";
             right.Controls.Add(_updateStatusLabel);
 
@@ -185,8 +188,8 @@ namespace WindowsFontTuner
             actions.AutoSize = false;
             actions.BackColor = Color.Transparent;
             actions.WrapContents = false;
-            actions.Size = new Size(390, 42);
-            actions.Location = new Point(0, 84);
+            actions.Size = new Size(390, 40);
+            actions.Location = new Point(0, 66);
             actions.Margin = new Padding(0);
             right.Controls.Add(actions);
 
@@ -215,7 +218,7 @@ namespace WindowsFontTuner
             body.RowCount = 1;
             body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
             body.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
-            body.Margin = new Padding(0, 0, 0, 18);
+            body.Margin = new Padding(0, 0, 0, 8);
 
             body.Controls.Add(BuildPresetCard(), 0, 0);
             body.Controls.Add(BuildStatusCard(), 1, 0);
@@ -293,8 +296,10 @@ namespace WindowsFontTuner
             layout.Controls.Add(actions, 0, 3);
 
             actions.Controls.Add(BuildButton("应用当前预设", ApplyButton_Click, ModernButtonStyle.Primary, 138));
-            _installFontsButton = BuildButton("安装预设字体", InstallFontsButton_Click, ModernButtonStyle.Secondary, 138);
+            _installFontsButton = BuildButton("安装所需字体", InstallFontsButton_Click, ModernButtonStyle.Secondary, 118);
             actions.Controls.Add(_installFontsButton);
+            _installFontsButton.Text = "安装所需字体";
+            _installFontsButton.Width = 118;
             actions.Controls.Add(BuildButton("创建备份", BackupButton_Click, ModernButtonStyle.Secondary, 116));
             actions.Controls.Add(BuildButton("恢复最近备份", RestoreButton_Click, ModernButtonStyle.Secondary, 142));
             actions.Controls.Add(BuildButton("打开备份目录", OpenBackupsButton_Click, ModernButtonStyle.Ghost, 128));
@@ -307,7 +312,7 @@ namespace WindowsFontTuner
             descriptionCard.BorderColor = Color.FromArgb(224, 231, 241);
             descriptionCard.Padding = new Padding(16);
             descriptionCard.Margin = new Padding(0, 16, 0, 0);
-            descriptionCard.Height = 132;
+            descriptionCard.Height = 120;
             layout.Controls.Add(descriptionCard, 0, 4);
 
             Label descriptionTitle = new Label();
@@ -335,6 +340,7 @@ namespace WindowsFontTuner
             quickPickCard.BorderColor = Color.FromArgb(222, 231, 240);
             quickPickCard.Padding = new Padding(16);
             quickPickCard.Margin = new Padding(0, 16, 0, 0);
+            quickPickCard.Visible = false;
             layout.Controls.Add(quickPickCard, 0, 5);
 
             Label quickPickTitle = new Label();
@@ -390,15 +396,20 @@ namespace WindowsFontTuner
             title.Text = "状态与资源";
             layout.Controls.Add(title, 0, 0);
 
+            Panel adminHost = new Panel();
+            adminHost.Dock = DockStyle.Top;
+            adminHost.Height = 44;
+            adminHost.Margin = new Padding(0, 10, 0, 0);
+            adminHost.BackColor = Color.Transparent;
+            layout.Controls.Add(adminHost, 0, 1);
+
             _adminLabel = new Label();
             _adminLabel.AutoSize = false;
-            _adminLabel.Dock = DockStyle.Top;
-            _adminLabel.Height = 30;
-            _adminLabel.TextAlign = ContentAlignment.MiddleLeft;
+            _adminLabel.Dock = DockStyle.Fill;
+            _adminLabel.TextAlign = ContentAlignment.TopLeft;
             _adminLabel.BackColor = Color.Transparent;
-            _adminLabel.Font = new Font(Font.FontFamily, 9.5f, FontStyle.Bold);
-            _adminLabel.Margin = new Padding(0, 10, 0, 0);
-            layout.Controls.Add(_adminLabel, 0, 1);
+            _adminLabel.Font = new Font(Font.FontFamily, 9f, FontStyle.Bold);
+            adminHost.Controls.Add(_adminLabel);
 
             FlowLayoutPanel options = new FlowLayoutPanel();
             options.AutoSize = true;
@@ -430,7 +441,7 @@ namespace WindowsFontTuner
             fontCard.BorderColor = Color.FromArgb(224, 231, 241);
             fontCard.Padding = new Padding(16);
             fontCard.Margin = new Padding(0, 16, 0, 0);
-            fontCard.Height = 100;
+            fontCard.Height = 88;
             layout.Controls.Add(fontCard, 0, 3);
 
             Label fontTitle = new Label();
@@ -483,8 +494,8 @@ namespace WindowsFontTuner
             resourceActions.Margin = new Padding(0, 16, 0, 0);
             layout.Controls.Add(resourceActions, 0, 5);
 
-            resourceActions.Controls.Add(BuildButton("打开字体包目录", OpenFontPackagesButton_Click, ModernButtonStyle.Ghost, 132));
-            resourceActions.Controls.Add(BuildButton("查看 GitHub Release", OpenReleasePageButton_Click, ModernButtonStyle.Ghost, 150));
+            resourceActions.Controls.Add(BuildButton("字体包目录", OpenFontPackagesButton_Click, ModernButtonStyle.Ghost, 98));
+            resourceActions.Controls.Add(BuildButton("GitHub 发布页", OpenReleasePageButton_Click, ModernButtonStyle.Ghost, 112));
 
             return card;
         }
@@ -582,6 +593,9 @@ namespace WindowsFontTuner
             _adminLabel.Text = isAdmin
                 ? "管理员模式已启用，可以直接备份、应用和恢复系统字体设置。"
                 : "当前不是管理员模式。要真正写入系统字体设置，请右键“以管理员身份运行”。";
+            _adminLabel.Text = isAdmin
+                ? "管理员模式已启用，可直接备份、应用和恢复设置。"
+                : "当前不是管理员模式。要写入系统字体，请右键“以管理员身份运行”。";
             _adminLabel.ForeColor = isAdmin ? UiPalette.Success : UiPalette.Warning;
 
             _versionBadgeLabel.Text = "当前版本 v" + FormatVersion(GetCurrentVersion());
@@ -710,7 +724,8 @@ namespace WindowsFontTuner
             }
 
             _installFontsButton.Enabled = true;
-            _installFontsButton.Text = "安装 " + package.Name;
+            _installFontsButton.Text = "安装所需字体";
+            _installFontsButton.Width = 118;
             _packageInfoLabel.Text =
                 package.Name + Environment.NewLine +
                 (string.IsNullOrWhiteSpace(package.Description) ? "未提供说明" : package.Description) + Environment.NewLine + Environment.NewLine +
