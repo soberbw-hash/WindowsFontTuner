@@ -9,4 +9,5 @@ obj/
 Thumbs.db
 .vs/
 artifacts/
+dist/
 *.zip
