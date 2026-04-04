@@ -10,13 +10,13 @@ namespace WindowsFontTuner
         public static readonly Color WindowBackground = Color.FromArgb(240, 245, 251);
         public static readonly Color CardBackground = Color.FromArgb(232, 252, 253, 255);
         public static readonly Color Border = Color.FromArgb(214, 225, 239);
-        public static readonly Color Accent = Color.FromArgb(27, 108, 236);
-        public static readonly Color AccentHover = Color.FromArgb(18, 95, 217);
-        public static readonly Color AccentPressed = Color.FromArgb(12, 80, 191);
-        public static readonly Color AccentSoft = Color.FromArgb(228, 239, 255);
-        public static readonly Color Secondary = Color.FromArgb(245, 248, 252);
-        public static readonly Color SecondaryHover = Color.FromArgb(236, 242, 250);
-        public static readonly Color SecondaryPressed = Color.FromArgb(226, 235, 247);
+        public static readonly Color Accent = Color.FromArgb(46, 94, 196);
+        public static readonly Color AccentHover = Color.FromArgb(38, 84, 180);
+        public static readonly Color AccentPressed = Color.FromArgb(32, 73, 163);
+        public static readonly Color AccentSoft = Color.FromArgb(233, 240, 252);
+        public static readonly Color Secondary = Color.FromArgb(249, 251, 253);
+        public static readonly Color SecondaryHover = Color.FromArgb(242, 246, 251);
+        public static readonly Color SecondaryPressed = Color.FromArgb(235, 241, 248);
         public static readonly Color TextPrimary = Color.FromArgb(26, 33, 52);
         public static readonly Color TextSecondary = Color.FromArgb(84, 96, 122);
         public static readonly Color TextMuted = Color.FromArgb(113, 125, 148);
@@ -250,9 +250,9 @@ namespace WindowsFontTuner
             TabStop = true;
             Cursor = Cursors.Hand;
             DoubleBuffered = true;
-            Height = 40;
-            Width = 132;
-            Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.25f, FontStyle.Bold);
+            Height = 36;
+            Width = 128;
+            Font = new Font(SystemFonts.MessageBoxFont.FontFamily, 9.2f, FontStyle.Regular);
             ForeColor = UiPalette.TextPrimary;
             BackColor = Color.Transparent;
         }
@@ -301,9 +301,9 @@ namespace WindowsFontTuner
         protected override void OnPaint(PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            e.Graphics.Clear(Parent == null ? UiPalette.WindowBackground : Parent.BackColor);
+            e.Graphics.Clear(ResolveSurfaceColor());
 
-            Rectangle bounds = new Rectangle(0, 0, Width - 1, Height - 1);
+            Rectangle bounds = new Rectangle(1, 1, Width - 3, Height - 3);
             Color fill;
             Color border;
             Color textColor;
@@ -324,38 +324,59 @@ namespace WindowsFontTuner
                 Font,
                 bounds,
                 textColor,
-                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
         }
 
         private void ResolveColors(out Color fill, out Color border, out Color textColor)
         {
             if (!Enabled)
             {
-                fill = Color.FromArgb(236, 240, 246);
-                border = Color.FromArgb(220, 226, 236);
+                fill = Color.FromArgb(241, 244, 248);
+                border = Color.FromArgb(229, 234, 240);
                 textColor = UiPalette.TextMuted;
                 return;
             }
 
             if (_buttonStyle == ModernButtonStyle.Primary)
             {
-                fill = _pressed ? UiPalette.AccentPressed : (_hovered ? UiPalette.AccentHover : UiPalette.Accent);
-                border = fill;
-                textColor = Color.White;
+                fill = _pressed
+                    ? Color.FromArgb(214, 227, 248)
+                    : (_hovered ? Color.FromArgb(224, 235, 251) : UiPalette.AccentSoft);
+                border = _pressed
+                    ? Color.FromArgb(152, 182, 231)
+                    : (_hovered ? Color.FromArgb(165, 194, 239) : Color.FromArgb(184, 206, 240));
+                textColor = UiPalette.Accent;
                 return;
             }
 
             if (_buttonStyle == ModernButtonStyle.Ghost)
             {
-                fill = _pressed ? Color.FromArgb(224, 233, 245) : (_hovered ? Color.FromArgb(237, 243, 251) : Color.Transparent);
-                border = _hovered || _pressed ? UiPalette.Border : Color.Transparent;
+                fill = _pressed ? Color.FromArgb(236, 241, 248) : (_hovered ? Color.FromArgb(244, 247, 251) : ResolveSurfaceColor());
+                border = _hovered || _pressed ? Color.FromArgb(225, 231, 240) : ResolveSurfaceColor();
                 textColor = UiPalette.TextSecondary;
                 return;
             }
 
             fill = _pressed ? UiPalette.SecondaryPressed : (_hovered ? UiPalette.SecondaryHover : UiPalette.Secondary);
-            border = UiPalette.Border;
+            border = Color.FromArgb(225, 231, 240);
             textColor = UiPalette.TextPrimary;
+        }
+
+        private Color ResolveSurfaceColor()
+        {
+            Control current = Parent;
+
+            while (current != null)
+            {
+                if (current.BackColor.A > 0 && current.BackColor != Color.Transparent)
+                {
+                    return current.BackColor;
+                }
+
+                current = current.Parent;
+            }
+
+            return UiPalette.WindowBackground;
         }
     }
 }

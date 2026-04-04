@@ -62,7 +62,7 @@ namespace WindowsFontTuner
             shell.BackColor = Color.Transparent;
             shell.ColumnCount = 1;
             shell.RowCount = 3;
-            shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 178f));
+            shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 196f));
             shell.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
             shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 224f));
             Controls.Add(shell);
@@ -111,7 +111,7 @@ namespace WindowsFontTuner
             hero.UseGradient = true;
             hero.ShowGlow = true;
             hero.CornerRadius = 34;
-            hero.Padding = new Padding(28, 24, 28, 24);
+            hero.Padding = new Padding(28, 20, 28, 20);
             hero.Margin = new Padding(0, 0, 0, 18);
 
             TableLayoutPanel layout = new TableLayoutPanel();
@@ -143,7 +143,7 @@ namespace WindowsFontTuner
             _heroSubtitleLabel.ForeColor = UiPalette.TextSecondary;
             _heroSubtitleLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Regular);
             _heroSubtitleLabel.Location = new Point(0, 46);
-            _heroSubtitleLabel.Size = new Size(520, 76);
+            _heroSubtitleLabel.Size = new Size(520, 68);
             _heroSubtitleLabel.Text =
                 "内置三套可直接安装的字体包，也支持一键备份、恢复、应用预设。" + Environment.NewLine +
                 "这一版还加了更圆润的界面和本地检查更新，别人装完软件后也能看到新版本提示。";
@@ -155,7 +155,7 @@ namespace WindowsFontTuner
             _versionBadgeLabel.ForeColor = UiPalette.Accent;
             _versionBadgeLabel.Font = new Font(Font.FontFamily, 9f, FontStyle.Bold);
             _versionBadgeLabel.Padding = new Padding(12, 6, 12, 6);
-            _versionBadgeLabel.Location = new Point(0, 126);
+            _versionBadgeLabel.Location = new Point(0, 118);
             left.Controls.Add(_versionBadgeLabel);
 
             Panel right = new Panel();
@@ -176,16 +176,18 @@ namespace WindowsFontTuner
             _updateStatusLabel.AutoSize = false;
             _updateStatusLabel.BackColor = Color.Transparent;
             _updateStatusLabel.ForeColor = UiPalette.TextSecondary;
-            _updateStatusLabel.Location = new Point(0, 34);
-            _updateStatusLabel.Size = new Size(360, 56);
+            _updateStatusLabel.Location = new Point(0, 32);
+            _updateStatusLabel.Size = new Size(360, 42);
             _updateStatusLabel.Text = "启动后会自动检查 GitHub Release，也可以手动点按钮立即检查。";
             right.Controls.Add(_updateStatusLabel);
 
             FlowLayoutPanel actions = new FlowLayoutPanel();
-            actions.AutoSize = true;
+            actions.AutoSize = false;
             actions.BackColor = Color.Transparent;
-            actions.WrapContents = true;
-            actions.Location = new Point(0, 98);
+            actions.WrapContents = false;
+            actions.Size = new Size(390, 42);
+            actions.Location = new Point(0, 84);
+            actions.Margin = new Padding(0);
             right.Controls.Add(actions);
 
             _checkUpdatesButton = BuildButton("检查更新", CheckUpdatesButton_Click, ModernButtonStyle.Primary, 126);
@@ -197,6 +199,9 @@ namespace WindowsFontTuner
             _openDownloadButton = BuildButton("下载新版本", OpenDownloadButton_Click, ModernButtonStyle.Secondary, 138);
             _openDownloadButton.Visible = false;
             actions.Controls.Add(_openDownloadButton);
+            _checkUpdatesButton.Width = 110;
+            _openUpdateButton.Width = 122;
+            _openDownloadButton.Width = 118;
 
             return hero;
         }
@@ -562,8 +567,8 @@ namespace WindowsFontTuner
             button.Text = text;
             button.Width = width;
             button.ButtonStyle = style;
-            button.CornerRadius = 14;
-            button.Margin = new Padding(0, 0, 10, 10);
+            button.CornerRadius = 12;
+            button.Margin = new Padding(0, 0, 8, 8);
             button.Click += onClick;
             return button;
         }
