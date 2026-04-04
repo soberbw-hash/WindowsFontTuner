@@ -1,0 +1,12 @@
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.tmp
+*.log
+*.pdb
+Thumbs.db
+.vs/
+artifacts/
+*.zip

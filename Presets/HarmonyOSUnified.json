@@ -1,0 +1,48 @@
+{
+  "Name": "HarmonyOS Unified",
+  "Description": "Backs up the current Windows font-related keys, switches Segoe UI and Segoe UI Variable aliases to HarmonyOS Sans SC / HarmonyOS Sans SC Medium, applies grayscale rendering, and updates legacy icon and menu fonts to HarmonyOS Sans SC weight 550.",
+  "RequiredFonts": [
+    "HarmonyOS Sans SC",
+    "HarmonyOS Sans SC Medium"
+  ],
+  "FontSubstitutes": {
+    "Segoe UI": "HarmonyOS Sans SC Medium",
+    "Segoe UI Light": "HarmonyOS Sans SC",
+    "Segoe UI Semilight": "HarmonyOS Sans SC",
+    "Segoe UI Semibold": "HarmonyOS Sans SC Medium",
+    "Segoe UI Black": "HarmonyOS Sans SC Bold",
+    "Segoe UI Variable": "HarmonyOS Sans SC Medium",
+    "Segoe UI Variable Text": "HarmonyOS Sans SC Medium",
+    "Segoe UI Variable Text Light": "HarmonyOS Sans SC",
+    "Segoe UI Variable Text Semibold": "HarmonyOS Sans SC Medium",
+    "Segoe UI Variable Display": "HarmonyOS Sans SC Medium",
+    "Segoe UI Variable Display Light": "HarmonyOS Sans SC",
+    "Segoe UI Variable Display Semibold": "HarmonyOS Sans SC Medium",
+    "Segoe UI Variable Small": "HarmonyOS Sans SC Medium",
+    "Segoe UI Variable Small Light": "HarmonyOS Sans SC",
+    "Segoe UI Variable Small Semibold": "HarmonyOS Sans SC Medium",
+    "Microsoft YaHei": "HarmonyOS Sans SC Medium",
+    "Microsoft YaHei UI": "HarmonyOS Sans SC Medium",
+    "Microsoft YaHei Light": "HarmonyOS Sans SC",
+    "Microsoft YaHei UI Light": "HarmonyOS Sans SC",
+    "Microsoft YaHei Semibold": "HarmonyOS Sans SC Medium",
+    "Microsoft YaHei UI Semibold": "HarmonyOS Sans SC Medium"
+  },
+  "DesktopTextSettings": {
+    "FontSmoothing": "2",
+    "FontSmoothingType": 1,
+    "FontSmoothingGamma": 1850,
+    "FontSmoothingOrientation": 1
+  },
+  "Rendering": {
+    "PixelStructure": 0,
+    "GammaLevel": 1850,
+    "ClearTypeLevel": 0,
+    "TextContrastLevel": 5
+  },
+  "WindowMetrics": {
+    "FaceName": "HarmonyOS Sans SC",
+    "Weight": 550,
+    "Quality": 5
+  }
+}
