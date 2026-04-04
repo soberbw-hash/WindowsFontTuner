@@ -1,74 +1,84 @@
 # Windows全局字体替换器
 
-如果你也不想忍受Windows默认字体的痛苦，不想忍受那种割裂，发虚的字体，那一定要来看看这个。
-`Windows全局字体替换器` 是一个面向普通用户的小工具，用来备份、应用和恢复 Windows 全局字体替换预设。
+> 如果你也受够了微软那套又细、又灰、又发虚，看久了像在拿眼睛上刑的默认字体，这个工具就是给你准备的。  
+> 一键换字体，一键备份，一键恢复，尽量少折腾系统，尽量多提升观感。
 
-现在同时提供两种发布形式：
+`Windows全局字体替换器` 是一个给普通用户准备的 Windows 字体调校工具。  
+它的目标很直接：把系统字体从“能用”拉到“顺眼”，而且别把电脑搞炸。
 
-- `zip` 便携版：适合已经习惯自己解压运行的人
-- `Setup.exe` 安装版：适合直接双击安装的小白用户
+## ✨ 这玩意能干嘛
 
-这一版开始，软件里直接附带了三套可安装字体包，下载后不需要再自己上网找字体：
+- 一键替换 `Segoe UI` / `Segoe UI Variable` 相关系统字体映射
+- 一键调整桌面图标、菜单、传统窗口字体
+- 一键应用更舒服的文字渲染参数
+- 自动备份 `FontSubstitutes`、`Desktop`、`Avalon.Graphics`、`WindowMetrics`
+- 一键恢复最近一次备份，翻车了也能撤回
+- 内置字体包，不用再自己满网找字体
+- 支持检查更新，后续发新版本软件里能直接提示
+
+## 📦 现在有两种下载方式
+
+- `Setup.exe` 安装版：适合小白，双击安装，自动创建桌面和开始菜单快捷方式
+- `zip` 便携版：适合喜欢自己解压、自己掌控目录的人
+
+## 🔤 内置三套字体方案
 
 - `HarmonyOS Sans SC`
+  风格现代、干净，整体观感最接近这台机器现在调好的效果。
+
 - `Source Han Sans CN`
+  最稳、最中性，跨机器一致性最好，适合长期默认使用。
+
 - `Sarasa UI SC`
+  笔画更扎实，更有存在感，适合嫌 Windows 默认太细的人。
 
-你可以先安装字体，再一键切换预设。
+## 🎯 适合谁
 
-## 适合做什么
+- 看不惯 Windows 默认字体那股“又细又虚”的味道
+- 想把桌面、资源管理器、传统界面整体调顺眼一点
+- 不想手动翻注册表，但又想保留可回退能力
+- 想直接给朋友或网友发一个能用的字体替换工具
 
-- 备份 `FontSubstitutes`、`Desktop`、`Avalon.Graphics`、`WindowMetrics`
-- 把 `Segoe UI` / `Segoe UI Variable` 替换成更顺眼的中文黑体
-- 应用更接近灰阶抗锯齿的文字渲染方案
-- 调整桌面图标、菜单和传统窗口字体
-- 重建字体缓存并重启资源管理器
+## 🚀 怎么用
 
-## 当前内置的三个选项
+1. 下载你想要的版本。
+2. 如果你下的是 `Setup.exe`，直接双击安装。
+3. 如果你下的是 `zip`，解压后右键运行 `WindowsFontTuner.exe`，选择“以管理员身份运行”。
+4. 在下拉框里选一个预设。
+5. 点击“安装所需字体”。
+6. 点击“应用当前预设”。
+7. 如果效果不满意，点击“恢复最近备份”。
 
-### 1. HarmonyOS 统一预设
+## 🧠 软件里实际做了什么
 
-- 风格最接近这台机器当前调好的效果
-- 现代、干净、整体感强
-- 适合想继续保持 HarmonyOS 风格的人
+- 从 `Presets` 目录读取多个字体预设
+- 从 `FontPackages` 目录读取内置字体包
+- 检查当前预设所需字体是否已经安装
+- 自动安装当前预设所需字体
+- 自动导出一份注册表备份到 `%LOCALAPPDATA%\\WindowsFontTuner\\Backups`
+- 写入字体替换、渲染参数和窗口字体设置
+- 重建字体缓存并按需重启资源管理器
 
-### 2. 思源黑体 CN 统一预设
+## ⚠️ 先把边界说清楚
 
-- 最稳妥、最中性
-- 跨机器一致性最好
-- 适合想要稳定、标准、耐看的系统字体风格的人
+- Windows 11 的字体显示不是一条线说了算，不同区域响应程度可能不一样
+- 这个工具不保证系统里每一个角落都会 100% 跟着同一套字体走
+- 它不会自动卸载已经安装到系统里的字体文件
+- 它不会去改 Explorer 的私有资源，也不会碰 WinUI / XAML 私有样式
 
-### 3. 更纱 UI SC 统一预设
+## ❓为什么没有 MiSans
 
-- 三套里最有存在感
-- 笔画更扎实，内容区更容易看清
-- 适合觉得 Windows 默认太细的人
+不是我不想放，是它的授权不适合直接塞进公开 Release。
 
-## 软件现在能做什么
+简单说就是：
 
-- 从 `Presets` 文件夹加载多个预设
-- 从 `FontPackages` 文件夹读取内置字体包
-- 检查预设需要的字体是否已经安装
-- 一键安装当前预设所需字体
-- 自动把相关注册表导出到 `%LOCALAPPDATA%\\WindowsFontTuner\\Backups`
-- 一键应用字体替换、渲染参数和窗口字体设置
-- 一键恢复最近一次备份
+- `MiSans` 官方授权明确限制再次分发字体软件或其副本
+- 所以它不适合被直接打进一个公开下载的工具里
+- 现在内置的三套字体，都是更适合公开分发的方案
 
-## 软件不能做什么
+## 📝 字体授权与来源
 
-- 不保证 Windows 11 的每一个界面区域都会完全遵循同一套字体设置
-- 不会自动卸载已经安装到系统里的字体文件
-- 不修改 Explorer 私有资源或 XAML 私有样式
-
-## 为什么没有 MiSans
-
-我没有把 `MiSans` 打进发布包。
-
-原因很简单：它的官方授权明确写了，不能单独再分发字体软件或其副本，所以不适合直接塞进公开 Release 里。
-
-## 字体授权
-
-软件内置字体包时，都会一起附带原始授权文件和来源说明：
+软件附带字体包时，都会一起带上原始授权文件和来源说明：
 
 - `FontPackages\\harmonyos-sc\\LICENSE.txt`
 - `FontPackages\\source-han-sans-cn\\LICENSE.txt`
@@ -80,44 +90,35 @@
 - [Source Han Sans 官方仓库](https://github.com/adobe-fonts/source-han-sans)
 - [Sarasa Gothic 官方仓库](https://github.com/be5invis/Sarasa-Gothic)
 
-## 使用方法
+## 🛠️ 自己构建
 
-1. 如果你下载的是 `Setup.exe`，直接双击安装即可，安装后会自动创建桌面和开始菜单快捷方式。
-2. 如果你下载的是 `zip` 便携版，解压后右键运行 `WindowsFontTuner.exe`，选择“以管理员身份运行”。
-3. 在下拉框里选择一个预设。
-4. 先点“安装所需字体”。
-5. 再点“应用当前预设”。
-6. 如果不满意，可以点“恢复最近备份”。
+项目目标框架是 `.NET Framework 4.8`，使用 Windows 自带环境里的 `MSBuild`。
 
-## 构建方法
-
-本项目目标框架是 `.NET Framework 4.8`，使用 Windows 自带环境里的 `MSBuild`。
-
-运行：
+普通构建：
 
 ```bat
 build.bat
 ```
 
-生成文件位置：
+生成位置：
 
 ```text
 bin\Release\WindowsFontTuner.exe
 ```
 
-如果要一次生成 `zip` 便携包和 `Setup.exe` 安装包，可以运行：
+如果你想一次性打出 `zip` 便携包和 `Setup.exe` 安装包：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\Build-Packages.ps1 -Version 0.4.4
 ```
 
-## 自定义预设
+## 🧩 自定义预设
 
 预设就是 `Presets` 目录里的 JSON 文件。
 
-字段说明：
+主要字段说明：
 
-- `Name`：界面里显示的预设名称
+- `Name`：界面里显示的预设名
 - `Description`：预设说明
 - `FontPackageId`：当前预设对应的内置字体包 ID
 - `RequiredFonts`：这个预设依赖的已安装字体
@@ -126,25 +127,34 @@ powershell -ExecutionPolicy Bypass -File .\scripts\Build-Packages.ps1 -Version 0
 - `Rendering`：写入 `HKCU\Software\Microsoft\Avalon.Graphics\DISPLAY*` 的渲染参数
 - `WindowMetrics`：通过 `SystemParametersInfo` 应用的窗口、菜单、图标字体参数
 
-## 发布到 GitHub
+## 🚢 发布到 GitHub
 
 这个目录已经可以直接当作 Git 仓库使用。
 
-如果你已经有一个空仓库，可以运行：
+如果你已经有一个空仓库：
 
 ```bat
 git remote add origin https://github.com/<your-name>/WindowsFontTuner.git
 git push -u origin main
 ```
 
-如果你已经配置好了 GitHub 凭据，也可以直接用内置脚本更新 release：
+如果你已经配置好了 GitHub 凭据，可以直接用内置脚本更新 Release：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 -Version 0.4.4 -AssetPaths .\dist\WindowsFontTuner-v0.4.4-win64.zip,.\dist\WindowsFontTuner-Setup-v0.4.4.exe
+$assets = @(
+  '.\dist\WindowsFontTuner-v0.4.4-win64.zip',
+  '.\dist\WindowsFontTuner-Setup-v0.4.4.exe'
+)
+
+powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 `
+  -Version 0.4.4 `
+  -ReleaseName 'Windows全局字体替换器 v0.4.4' `
+  -AssetPaths $assets
 ```
 
-## 说明
+## 🪄 最后一句
 
-- Windows 11 的字体显示由多套机制共同决定，不同区域对这些设置的响应程度可能不同。
-- 程序在应用预设之前，会先自动导出一份时间戳备份，方便你随时回退。
-- 恢复最近备份主要回退字体映射和渲染设置，不会自动删除已经安装到系统里的字体文件。
+这个工具不是为了把 Windows 变成 macOS。  
+它只是很认真地解决一个很多人都在忍、但懒得自己折腾的问题：
+
+**让 Windows 字体，终于看起来像是给人看的。**
