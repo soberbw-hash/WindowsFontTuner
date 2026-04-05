@@ -991,7 +991,7 @@ namespace WindowsFontTuner
             Control resourceCard = BuildDashboardResourceCard();
             row.Controls.Add(previewCard, 0, 0);
             row.Controls.Add(resourceCard, 1, 0);
-            ConfigureResponsiveRow(row, previewCard, resourceCard, 1180, 404, 760, 58f, 42f);
+            ConfigureResponsiveRow(row, previewCard, resourceCard, 1240, 420, 780, 58f, 42f);
 
             return row;
         }
@@ -1140,7 +1140,7 @@ namespace WindowsFontTuner
             Control statusCard = BuildStatusCard();
             topRow.Controls.Add(presetCard, 0, 0);
             topRow.Controls.Add(statusCard, 1, 0);
-            ConfigureResponsiveRow(topRow, presetCard, statusCard, 1220, 596, 980, 58f, 42f);
+            ConfigureResponsiveRow(topRow, presetCard, statusCard, 1280, 612, 1000, 58f, 42f);
             canvas.Controls.Add(topRow, 0, 1);
 
             canvas.Controls.Add(BuildMappingCard(), 0, 2);
@@ -1310,7 +1310,7 @@ namespace WindowsFontTuner
         {
             ModernCardPanel card = CreateCard(false, 28, UiPalette.CardBackground);
             card.Dock = DockStyle.Top;
-            card.Height = 348;
+            card.Height = 454;
             card.Margin = new Padding(0, 0, 0, 12);
             card.Padding = new Padding(22);
 
@@ -1323,7 +1323,7 @@ namespace WindowsFontTuner
 
             _mappingFlow = new FlowLayoutPanel();
             _mappingFlow.Location = new Point(22, 92);
-            _mappingFlow.Size = new Size(840, 220);
+            _mappingFlow.Size = new Size(840, 326);
             _mappingFlow.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _mappingFlow.AutoScroll = false;
             _mappingFlow.WrapContents = true;
@@ -1355,7 +1355,7 @@ namespace WindowsFontTuner
             Control previewCard = BuildRenderingPreviewCard();
             mainRow.Controls.Add(configCard, 0, 0);
             mainRow.Controls.Add(previewCard, 1, 0);
-            ConfigureResponsiveRow(mainRow, configCard, previewCard, 1240, 520, 860, 42f, 58f);
+            ConfigureResponsiveRow(mainRow, configCard, previewCard, 1320, 540, 900, 42f, 58f);
             canvas.Controls.Add(mainRow, 0, 1);
 
             return page;
@@ -1449,7 +1449,7 @@ namespace WindowsFontTuner
             split.Controls.Add(currentPane, 0, 0);
             split.Controls.Add(tunedPane, 1, 0);
             BindControlWidth(card, split, 22, 22, 340);
-            ConfigureResponsivePreviewSplit(split, currentPane, tunedPane, 800, 318, 410);
+            ConfigureResponsivePreviewSplit(split, currentPane, tunedPane, 980, 318, 430);
 
             _renderPreviewMetaLabel = CreateMutedLabel("这里只帮你确认字重、字宽和正文字体观感。", 22, 420, 420, 36);
             card.Controls.Add(_renderPreviewMetaLabel);
@@ -1478,7 +1478,7 @@ namespace WindowsFontTuner
             Control resourcesCard = BuildResourcesCard();
             topRow.Controls.Add(settingsCard, 0, 0);
             topRow.Controls.Add(resourcesCard, 1, 0);
-            ConfigureResponsiveRow(topRow, settingsCard, resourcesCard, 1200, 356, 620, 52f, 48f);
+            ConfigureResponsiveRow(topRow, settingsCard, resourcesCard, 1280, 372, 660, 52f, 48f);
             canvas.Controls.Add(topRow, 0, 1);
 
             canvas.Controls.Add(BuildBackupsCard(), 0, 2);
@@ -1566,7 +1566,7 @@ namespace WindowsFontTuner
             title.Location = new Point(22, 20);
             card.Controls.Add(title);
 
-            Label sub = CreateMutedLabel("不管是字体包、预设还是快照，都能直接从这里打开。", 22, 54, 300, 20);
+            Label sub = CreateMutedLabel("字体包、预设和快照都能从这里直接打开。", 22, 54, 300, 20);
             card.Controls.Add(sub);
 
             FlowLayoutPanel actions = new FlowLayoutPanel();
@@ -1579,7 +1579,7 @@ namespace WindowsFontTuner
             BindWrappedLabel(card, sub, 22, 54, 22, 220, 20);
             BindFlowWidth(card, actions, 22, 22, 220);
 
-            actions.Controls.Add(BuildButton("字体包目录", OpenFontPackagesButton_Click, ModernButtonStyle.Secondary, 0));
+            actions.Controls.Add(BuildButton("字体目录", OpenFontPackagesButton_Click, ModernButtonStyle.Secondary, 0));
             actions.Controls.Add(BuildButton("预设目录", OpenPresetsButton_Click, ModernButtonStyle.Secondary, 0));
             actions.Controls.Add(BuildButton("备份目录", OpenBackupsButton_Click, ModernButtonStyle.Secondary, 0));
             actions.Controls.Add(BuildButton("发布页", OpenReleasePageButton_Click, ModernButtonStyle.Ghost, 0));
@@ -1693,6 +1693,7 @@ namespace WindowsFontTuner
 
             Label note = CreateMutedLabel(noteText, 16, 86, 190, 26);
             card.Controls.Add(note);
+            BindWrappedLabel(card, note, 16, 86, 16, 120, 24);
 
             return card;
         }
@@ -1712,6 +1713,7 @@ namespace WindowsFontTuner
             valueLabel.Font = new Font(Font.FontFamily, 12.2f, FontStyle.Bold);
             valueLabel.ForeColor = UiPalette.TextPrimary;
             card.Controls.Add(valueLabel);
+            BindWrappedLabel(card, valueLabel, 14, 40, 14, 100, 36);
 
             return card;
         }
@@ -2045,7 +2047,7 @@ namespace WindowsFontTuner
             {
                 _dashboardPackageNoteLabel.Text = package == null
                     ? "当前预设没有内置字体包，或者字体包目录不存在。"
-                    : package.Name + Environment.NewLine + SafeText(package.Description, "暂无额外描述。");
+                    : package.Name + Environment.NewLine + SafeText(package.Description, "暂无说明。");
             }
         }
 
@@ -2489,14 +2491,7 @@ namespace WindowsFontTuner
                 return "当前预设没有可用的内置字体包。";
             }
 
-            string summary = package.Name + Environment.NewLine + SafeText(package.Description, "暂无说明。");
-
-            if (!string.IsNullOrWhiteSpace(package.LicenseName))
-            {
-                summary += Environment.NewLine + "授权：" + package.LicenseName;
-            }
-
-            return summary;
+            return package.Name + Environment.NewLine + SafeText(package.Description, "暂无说明。");
         }
 
         private static string DescribeRenderingMode(FontPreset preset)

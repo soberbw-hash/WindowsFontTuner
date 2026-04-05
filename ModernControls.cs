@@ -68,6 +68,9 @@ namespace WindowsFontTuner
             {
                 string[] candidates =
                 {
+                    Path.Combine(baseDirectory, "FontPackages", "harmonyos-sc", "HarmonyOS_Sans_SC_Regular.ttf"),
+                    Path.Combine(baseDirectory, "FontPackages", "harmonyos-sc", "HarmonyOS_Sans_SC_Medium.ttf"),
+                    Path.Combine(baseDirectory, "FontPackages", "harmonyos-sc", "HarmonyOS_Sans_SC_Bold.ttf"),
                     Path.Combine(baseDirectory, "FontPackages", "sarasa-ui-sc", "SarasaUiSC-Regular.ttf"),
                     Path.Combine(baseDirectory, "FontPackages", "sarasa-ui-sc", "SarasaUiSC-SemiBold.ttf"),
                     Path.Combine(baseDirectory, "FontPackages", "sarasa-ui-sc", "SarasaUiSC-Bold.ttf")
@@ -83,7 +86,9 @@ namespace WindowsFontTuner
 
                 if (PrivateFonts.Families.Length > 0)
                 {
-                    _family = PrivateFonts.Families[0];
+                    _family = Array.Find(PrivateFonts.Families, family => family.Name.IndexOf("HarmonyOS", StringComparison.OrdinalIgnoreCase) >= 0)
+                        ?? Array.Find(PrivateFonts.Families, family => family.Name.IndexOf("Sarasa", StringComparison.OrdinalIgnoreCase) >= 0)
+                        ?? PrivateFonts.Families[0];
                 }
             }
             catch
