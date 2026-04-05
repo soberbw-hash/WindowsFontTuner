@@ -93,7 +93,7 @@ namespace WindowsFontTuner
             Text = "Windows全局字体替换器";
             Width = 1420;
             Height = 920;
-            MinimumSize = new Size(1180, 780);
+            MinimumSize = new Size(1100, 760);
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = UiPalette.WindowBackground;
             Font = UiTypography.Create(9.2f, FontStyle.Regular);
@@ -200,7 +200,7 @@ namespace WindowsFontTuner
             layout.RowCount = 3;
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 132f));
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 120f));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 164f));
             sidebar.Controls.Add(layout);
 
             layout.Controls.Add(BuildSidebarBrand(), 0, 0);
@@ -245,7 +245,7 @@ namespace WindowsFontTuner
             title.Font = new Font(Font.FontFamily, 11.4f, FontStyle.Bold);
             title.ForeColor = UiPalette.TextPrimary;
             title.Location = new Point(0, 70);
-            title.Size = new Size(176, 56);
+            title.Size = new Size(176, 64);
             title.UseCompatibleTextRendering = true;
             title.Text = "Windows全局字体替换器";
             host.Controls.Add(title);
@@ -256,7 +256,7 @@ namespace WindowsFontTuner
             sub.Font = new Font(Font.FontFamily, 8.5f, FontStyle.Regular);
             sub.ForeColor = UiPalette.TextMuted;
             sub.Location = new Point(0, 118);
-            sub.Size = new Size(176, 22);
+            sub.Size = new Size(176, 34);
             sub.Text = "替换 / 微调 / 备份 / 更新";
             host.Controls.Add(sub);
 
@@ -295,13 +295,13 @@ namespace WindowsFontTuner
             _sidebarStatusLabel.AutoSize = false;
             _sidebarStatusLabel.BackColor = Color.Transparent;
             _sidebarStatusLabel.Location = new Point(16, 40);
-            _sidebarStatusLabel.Size = new Size(170, 46);
+            _sidebarStatusLabel.Size = new Size(170, 36);
             _sidebarStatusLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
             _sidebarStatusLabel.ForeColor = UiPalette.TextPrimary;
             _sidebarStatusLabel.Text = "正在读取系统状态…";
             card.Controls.Add(_sidebarStatusLabel);
 
-            Label hint = CreateMutedLabel("内置 3 套字体，支持备份、恢复和更新检查。", 16, 82, 170, 30);
+            Label hint = CreateMutedLabel("内置 3 套字体，支持备份、恢复和更新检查。", 16, 78, 170, 48);
             hint.Font = new Font(Font.FontFamily, 8.6f, FontStyle.Regular);
             hint.ForeColor = UiPalette.TextMuted;
             card.Controls.Add(hint);
@@ -485,6 +485,7 @@ namespace WindowsFontTuner
             page.AutoScroll = true;
             page.BackColor = Color.Transparent;
             page.Padding = new Padding(24, 24, 24, 24);
+            EnableDoubleBuffer(page);
 
             canvas = new TableLayoutPanel();
             canvas.Dock = DockStyle.Top;
@@ -494,6 +495,7 @@ namespace WindowsFontTuner
             canvas.ColumnCount = 1;
             canvas.RowCount = 0;
             canvas.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+            EnableDoubleBuffer(canvas);
             page.Controls.Add(canvas);
 
             TableLayoutPanel layoutCanvas = canvas;
@@ -501,7 +503,7 @@ namespace WindowsFontTuner
             EventHandler resizeHandler = delegate
             {
                 int preferred = page.ClientSize.Width - page.Padding.Horizontal - 4;
-                layoutCanvas.Width = Math.Max(900, preferred);
+                layoutCanvas.Width = Math.Max(760, preferred);
             };
 
             page.Resize += resizeHandler;
@@ -525,6 +527,12 @@ namespace WindowsFontTuner
 
             row.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
             return row;
+        }
+
+        private static void EnableDoubleBuffer(Control control)
+        {
+            typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(control, true, null);
         }
 
         private static ModernCardPanel CreateCard(bool useGradient, int radius, Color fillColor)
@@ -590,14 +598,193 @@ namespace WindowsFontTuner
         {
             ModernButton button = new ModernButton();
             button.Text = text;
-            int measuredWidth = TextRenderer.MeasureText(text, button.Font).Width + 30;
-            button.Width = Math.Max(width, measuredWidth);
-            button.Height = 40;
+            int measuredWidth = TextRenderer.MeasureText(text, button.Font).Width + 24;
+            button.Width = width > 0 ? Math.Max(width, measuredWidth) : Math.Max(88, measuredWidth);
+            button.Height = 38;
             button.ButtonStyle = style;
             button.CornerRadius = 12;
             button.Margin = new Padding(0, 0, 8, 8);
             button.Click += onClick;
             return button;
+        }
+
+        private static void BindControlWidth(Control container, Control child, int left, int right, int minWidth)
+        {
+            EventHandler apply = delegate
+            {
+                int width = Math.Max(minWidth, container.ClientSize.Width - left - right);
+                if (child.Width != width)
+                {
+                    child.Width = width;
+                }
+            };
+
+            container.Resize += apply;
+            apply(container, EventArgs.Empty);
+        }
+
+        private static void BindWrappedLabel(Control container, Label label, int left, int top, int right, int minWidth, int minHeight)
+        {
+            EventHandler apply = delegate
+            {
+                int width = Math.Max(minWidth, container.ClientSize.Width - left - right);
+                Size measured = TextRenderer.MeasureText(
+                    label.Text ?? string.Empty,
+                    label.Font,
+                    new Size(width, 0),
+                    TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+                int height = Math.Max(minHeight, measured.Height + 4);
+
+                if (label.Location.X != left || label.Location.Y != top)
+                {
+                    label.Location = new Point(left, top);
+                }
+
+                if (label.Width != width || label.Height != height)
+                {
+                    label.Size = new Size(width, height);
+                }
+            };
+
+            container.Resize += apply;
+            label.TextChanged += apply;
+            apply(container, EventArgs.Empty);
+        }
+
+        private static void BindFlowWidth(Control container, FlowLayoutPanel flow, int left, int right, int minWidth)
+        {
+            EventHandler apply = delegate
+            {
+                int width = Math.Max(minWidth, container.ClientSize.Width - left - right);
+                if (flow.Width != width)
+                {
+                    flow.Width = width;
+                }
+
+                if (flow.MaximumSize.Width != width)
+                {
+                    flow.MaximumSize = new Size(width, 0);
+                }
+            };
+
+            container.Resize += apply;
+            apply(container, EventArgs.Empty);
+        }
+
+        private static void ConfigureResponsiveRow(TableLayoutPanel row, Control first, Control second, int breakPoint, int wideHeight, int stackedHeight, float wideFirstPercent, float wideSecondPercent)
+        {
+            bool? lastStacked = null;
+            EventHandler apply = delegate
+            {
+                bool stacked = row.Width < breakPoint;
+                int targetHeight = stacked ? stackedHeight : wideHeight;
+
+                if (lastStacked.HasValue && lastStacked.Value == stacked)
+                {
+                    if (row.Height != targetHeight)
+                    {
+                        row.Height = targetHeight;
+                    }
+
+                    return;
+                }
+
+                row.SuspendLayout();
+                row.Controls.Clear();
+                row.ColumnStyles.Clear();
+                row.RowStyles.Clear();
+
+                if (stacked)
+                {
+                    row.ColumnCount = 1;
+                    row.RowCount = 2;
+                    row.Height = stackedHeight;
+                    row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+                    row.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+                    row.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+                    first.Margin = new Padding(0, 0, 0, 16);
+                    second.Margin = new Padding(0);
+                    row.Controls.Add(first, 0, 0);
+                    row.Controls.Add(second, 0, 1);
+                }
+                else
+                {
+                    row.ColumnCount = 2;
+                    row.RowCount = 1;
+                    row.Height = wideHeight;
+                    row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, wideFirstPercent));
+                    row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, wideSecondPercent));
+                    row.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+                    first.Margin = new Padding(0, 0, 10, 0);
+                    second.Margin = new Padding(10, 0, 0, 0);
+                    row.Controls.Add(first, 0, 0);
+                    row.Controls.Add(second, 1, 0);
+                }
+
+                row.ResumeLayout();
+                lastStacked = stacked;
+            };
+
+            row.Resize += apply;
+            apply(row, EventArgs.Empty);
+        }
+
+        private static void ConfigureResponsivePreviewSplit(TableLayoutPanel split, Control leftPane, Control rightPane, int breakPoint, int wideHeight, int stackedHeight)
+        {
+            bool? lastStacked = null;
+            EventHandler apply = delegate
+            {
+                bool stacked = split.Width < breakPoint;
+                int targetHeight = stacked ? stackedHeight : wideHeight;
+
+                if (lastStacked.HasValue && lastStacked.Value == stacked)
+                {
+                    if (split.Height != targetHeight)
+                    {
+                        split.Height = targetHeight;
+                    }
+
+                    return;
+                }
+
+                split.SuspendLayout();
+                split.Controls.Clear();
+                split.ColumnStyles.Clear();
+                split.RowStyles.Clear();
+
+                if (stacked)
+                {
+                    split.ColumnCount = 1;
+                    split.RowCount = 2;
+                    split.Height = stackedHeight;
+                    split.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+                    split.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+                    split.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+                    leftPane.Margin = new Padding(0, 0, 0, 12);
+                    rightPane.Margin = new Padding(0);
+                    split.Controls.Add(leftPane, 0, 0);
+                    split.Controls.Add(rightPane, 0, 1);
+                }
+                else
+                {
+                    split.ColumnCount = 2;
+                    split.RowCount = 1;
+                    split.Height = wideHeight;
+                    split.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
+                    split.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
+                    split.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+                    leftPane.Margin = new Padding(0, 0, 10, 0);
+                    rightPane.Margin = new Padding(10, 0, 0, 0);
+                    split.Controls.Add(leftPane, 0, 0);
+                    split.Controls.Add(rightPane, 1, 0);
+                }
+
+                split.ResumeLayout();
+                lastStacked = stacked;
+            };
+
+            split.Resize += apply;
+            apply(split, EventArgs.Empty);
         }
 
         private Control BuildDashboardPage()
@@ -617,7 +804,7 @@ namespace WindowsFontTuner
             ModernCardPanel hero = CreateCard(true, 32, UiPalette.CardBackground);
             hero.ShowGlow = true;
             hero.Dock = DockStyle.Top;
-            hero.Height = 192;
+            hero.Height = 214;
             hero.Margin = new Padding(0, 0, 0, 18);
             hero.Padding = new Padding(26, 22, 26, 22);
 
@@ -639,8 +826,8 @@ namespace WindowsFontTuner
             title.AutoSize = false;
             title.BackColor = Color.Transparent;
             title.Location = new Point(0, 0);
-            title.Size = new Size(720, 34);
-            title.Font = new Font(Font.FontFamily, 14.2f, FontStyle.Bold);
+            title.Size = new Size(620, 28);
+            title.Font = new Font(Font.FontFamily, 12.8f, FontStyle.Bold);
             title.UseCompatibleTextRendering = false;
             title.AutoEllipsis = true;
             title.ForeColor = UiPalette.TextPrimary;
@@ -650,38 +837,36 @@ namespace WindowsFontTuner
             _dashboardHeroSupportLabel = new Label();
             _dashboardHeroSupportLabel.AutoSize = false;
             _dashboardHeroSupportLabel.BackColor = Color.Transparent;
-            _dashboardHeroSupportLabel.Location = new Point(0, 40);
-            _dashboardHeroSupportLabel.Size = new Size(720, 24);
+            _dashboardHeroSupportLabel.Location = new Point(0, 36);
+            _dashboardHeroSupportLabel.Size = new Size(620, 38);
             _dashboardHeroSupportLabel.Font = new Font(Font.FontFamily, 9.2f, FontStyle.Regular);
             _dashboardHeroSupportLabel.ForeColor = UiPalette.TextSecondary;
-            _dashboardHeroSupportLabel.Text = "内置三套字体，支持安装、备份、恢复和更新检查。";
+            _dashboardHeroSupportLabel.Text = "当前方案齐了字体就能直接应用，不齐的话先安装一遍。";
             _dashboardHeroSupportLabel.UseCompatibleTextRendering = false;
-            _dashboardHeroSupportLabel.AutoEllipsis = true;
             left.Controls.Add(_dashboardHeroSupportLabel);
+            BindControlWidth(left, title, 0, 0, 320);
+            BindWrappedLabel(left, _dashboardHeroSupportLabel, 0, 36, 0, 320, 22);
 
             _dashboardVersionBadgeLabel = CreateBadgeLabel("当前版本", UiPalette.AccentSoft, UiPalette.AccentTextSoft);
-            _dashboardVersionBadgeLabel.Location = new Point(0, 74);
+            _dashboardVersionBadgeLabel.Location = new Point(0, 78);
             left.Controls.Add(_dashboardVersionBadgeLabel);
 
             FlowLayoutPanel heroActions = new FlowLayoutPanel();
             heroActions.AutoSize = true;
             heroActions.BackColor = Color.Transparent;
-            heroActions.Location = new Point(0, 108);
-            heroActions.MaximumSize = new Size(720, 0);
+            heroActions.Location = new Point(0, 112);
+            heroActions.MaximumSize = new Size(360, 0);
             heroActions.WrapContents = true;
             left.Controls.Add(heroActions);
+            BindFlowWidth(left, heroActions, 0, 0, 240);
 
             ModernButton goReplacementButton = BuildButton("去字体替换", delegate { ShowPage(AppPage.Replacement); }, ModernButtonStyle.Primary, 118);
-            goReplacementButton.Margin = new Padding(0, 0, 10, 0);
+            goReplacementButton.Margin = new Padding(0, 0, 8, 8);
             heroActions.Controls.Add(goReplacementButton);
 
             ModernButton applyFromDashboardButton = BuildButton("立即应用当前预设", ApplyButton_Click, ModernButtonStyle.Secondary, 150);
-            applyFromDashboardButton.Margin = new Padding(0, 0, 10, 0);
+            applyFromDashboardButton.Margin = new Padding(0, 0, 0, 8);
             heroActions.Controls.Add(applyFromDashboardButton);
-
-            ModernButton goSettingsButton = BuildButton("打开设置与备份", delegate { ShowPage(AppPage.Settings); }, ModernButtonStyle.Ghost, 138);
-            goSettingsButton.Margin = new Padding(0);
-            heroActions.Controls.Add(goSettingsButton);
 
             Panel right = new Panel();
             right.Dock = DockStyle.Fill;
@@ -696,33 +881,83 @@ namespace WindowsFontTuner
             _dashboardUpdateStatusLabel.AutoSize = false;
             _dashboardUpdateStatusLabel.BackColor = Color.Transparent;
             _dashboardUpdateStatusLabel.Location = new Point(0, 32);
-            _dashboardUpdateStatusLabel.Size = new Size(268, 46);
+            _dashboardUpdateStatusLabel.Size = new Size(210, 42);
             _dashboardUpdateStatusLabel.Font = new Font(Font.FontFamily, 9.2f, FontStyle.Regular);
             _dashboardUpdateStatusLabel.ForeColor = UiPalette.TextSecondary;
-            _dashboardUpdateStatusLabel.Text = "启动后会自动检查更新，也可以手动查看。";
+            _dashboardUpdateStatusLabel.Text = "启动后会自动检查一次。";
             _dashboardUpdateStatusLabel.UseCompatibleTextRendering = false;
             right.Controls.Add(_dashboardUpdateStatusLabel);
+            BindWrappedLabel(right, _dashboardUpdateStatusLabel, 0, 32, 0, 180, 24);
 
             FlowLayoutPanel updateActions = new FlowLayoutPanel();
             updateActions.AutoSize = true;
             updateActions.BackColor = Color.Transparent;
-            updateActions.Location = new Point(0, 78);
-            updateActions.MaximumSize = new Size(268, 0);
+            updateActions.Location = new Point(0, 86);
+            updateActions.MaximumSize = new Size(220, 0);
             updateActions.WrapContents = true;
             right.Controls.Add(updateActions);
+            BindFlowWidth(right, updateActions, 0, 0, 180);
 
             _checkUpdatesButton = BuildButton("检查更新", CheckUpdatesButton_Click, ModernButtonStyle.Primary, 102);
-            _checkUpdatesButton.Margin = new Padding(0, 0, 10, 0);
+            _checkUpdatesButton.Margin = new Padding(0, 0, 8, 8);
             updateActions.Controls.Add(_checkUpdatesButton);
 
             _openUpdateButton = BuildButton("打开发布页", OpenUpdatePageButton_Click, ModernButtonStyle.Secondary, 108);
-            _openUpdateButton.Margin = new Padding(0, 0, 10, 0);
+            _openUpdateButton.Margin = new Padding(0, 0, 0, 8);
             updateActions.Controls.Add(_openUpdateButton);
 
-            _openDownloadButton = BuildButton("下载安装包", OpenDownloadButton_Click, ModernButtonStyle.Secondary, 118);
+            _openDownloadButton = BuildButton("下载新版", OpenDownloadButton_Click, ModernButtonStyle.Secondary, 118);
             _openDownloadButton.Margin = new Padding(0);
             _openDownloadButton.Visible = false;
             updateActions.Controls.Add(_openDownloadButton);
+
+            bool? heroStacked = null;
+            EventHandler applyHeroLayout = delegate
+            {
+                bool stacked = hero.ClientSize.Width < 1080;
+                if (heroStacked.HasValue && heroStacked.Value == stacked)
+                {
+                    return;
+                }
+
+                layout.SuspendLayout();
+                layout.Controls.Clear();
+                layout.ColumnStyles.Clear();
+                layout.RowStyles.Clear();
+
+                if (stacked)
+                {
+                    hero.Height = 270;
+                    layout.ColumnCount = 1;
+                    layout.RowCount = 2;
+                    layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+                    layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 148f));
+                    layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 94f));
+                    left.Margin = new Padding(0, 0, 0, 12);
+                    right.Margin = new Padding(0);
+                    layout.Controls.Add(left, 0, 0);
+                    layout.Controls.Add(right, 0, 1);
+                }
+                else
+                {
+                    hero.Height = 214;
+                    layout.ColumnCount = 2;
+                    layout.RowCount = 1;
+                    layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62f));
+                    layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38f));
+                    layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+                    left.Margin = new Padding(0, 0, 12, 0);
+                    right.Margin = new Padding(0);
+                    layout.Controls.Add(left, 0, 0);
+                    layout.Controls.Add(right, 1, 0);
+                }
+
+                layout.ResumeLayout();
+                heroStacked = stacked;
+            };
+
+            hero.Resize += applyHeroLayout;
+            applyHeroLayout(hero, EventArgs.Empty);
 
             return hero;
         }
@@ -744,7 +979,7 @@ namespace WindowsFontTuner
         {
             TableLayoutPanel row = new TableLayoutPanel();
             row.Dock = DockStyle.Top;
-            row.Height = 376;
+            row.Height = 404;
             row.Margin = new Padding(0, 0, 0, 18);
             row.BackColor = Color.Transparent;
             row.ColumnCount = 2;
@@ -752,8 +987,11 @@ namespace WindowsFontTuner
             row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
             row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
 
-            row.Controls.Add(BuildDashboardPreviewCard(), 0, 0);
-            row.Controls.Add(BuildDashboardResourceCard(), 1, 0);
+            Control previewCard = BuildDashboardPreviewCard();
+            Control resourceCard = BuildDashboardResourceCard();
+            row.Controls.Add(previewCard, 0, 0);
+            row.Controls.Add(resourceCard, 1, 0);
+            ConfigureResponsiveRow(row, previewCard, resourceCard, 1180, 404, 760, 58f, 42f);
 
             return row;
         }
@@ -769,23 +1007,24 @@ namespace WindowsFontTuner
             title.Location = new Point(22, 20);
             card.Controls.Add(title);
 
-            Label sub = CreateMutedLabel("会根据当前预设自动切换样张字体和字重。", 22, 52, 560, 20);
+            Label sub = CreateMutedLabel("会根据当前预设切换样张字体和字重。", 22, 52, 470, 20);
             card.Controls.Add(sub);
 
             ModernCardPanel sampleCard = CreateCard(false, 24, UiPalette.CardAltBackground);
             sampleCard.ShowShadow = false;
             sampleCard.BorderColor = UiPalette.Border;
             sampleCard.Location = new Point(22, 88);
-            sampleCard.Size = new Size(570, 220);
+            sampleCard.Size = new Size(470, 232);
             sampleCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             sampleCard.Padding = new Padding(18);
             card.Controls.Add(sampleCard);
+            BindControlWidth(card, sampleCard, 22, 22, 340);
 
             _dashboardPreviewTitleLabel = new Label();
             _dashboardPreviewTitleLabel.AutoSize = false;
             _dashboardPreviewTitleLabel.BackColor = Color.Transparent;
             _dashboardPreviewTitleLabel.Location = new Point(18, 18);
-            _dashboardPreviewTitleLabel.Size = new Size(530, 46);
+            _dashboardPreviewTitleLabel.Size = new Size(390, 42);
             _dashboardPreviewTitleLabel.Font = new Font(Font.FontFamily, 16.6f, FontStyle.Bold);
             _dashboardPreviewTitleLabel.ForeColor = UiPalette.TextPrimary;
             _dashboardPreviewTitleLabel.Text = "敏捷的棕色狐狸 0123456789";
@@ -796,20 +1035,25 @@ namespace WindowsFontTuner
             _dashboardPreviewBodyLabel.AutoSize = false;
             _dashboardPreviewBodyLabel.BackColor = Color.Transparent;
             _dashboardPreviewBodyLabel.Location = new Point(18, 70);
-            _dashboardPreviewBodyLabel.Size = new Size(530, 86);
+            _dashboardPreviewBodyLabel.Size = new Size(390, 92);
             _dashboardPreviewBodyLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Regular);
             _dashboardPreviewBodyLabel.ForeColor = UiPalette.TextSecondary;
             _dashboardPreviewBodyLabel.Text = "Aa The quick brown fox jumps over the lazy dog.\r\n资源管理器、桌面图标和常见正文区域会尽量统一风格。";
             _dashboardPreviewBodyLabel.UseCompatibleTextRendering = false;
             sampleCard.Controls.Add(_dashboardPreviewBodyLabel);
 
-            _dashboardPreviewMetaLabel = CreateMutedLabel("", 18, 168, 530, 28);
+            _dashboardPreviewMetaLabel = CreateMutedLabel("", 18, 176, 390, 28);
             _dashboardPreviewMetaLabel.Font = new Font(Font.FontFamily, 8.8f, FontStyle.Bold);
             _dashboardPreviewMetaLabel.ForeColor = UiPalette.TextMuted;
             sampleCard.Controls.Add(_dashboardPreviewMetaLabel);
 
-            Label tip = CreateMutedLabel("想继续调整效果，可以去“字体微调”页查看当前预设的渲染参数。", 22, 318, 560, 18);
+            Label tip = CreateMutedLabel("想继续微调的话，直接去“字体微调”页看参数。", 22, 330, 470, 18);
             card.Controls.Add(tip);
+            BindControlWidth(card, sub, 22, 22, 300);
+            BindControlWidth(sampleCard, _dashboardPreviewTitleLabel, 18, 18, 260);
+            BindControlWidth(sampleCard, _dashboardPreviewBodyLabel, 18, 18, 260);
+            BindControlWidth(sampleCard, _dashboardPreviewMetaLabel, 18, 18, 260);
+            BindControlWidth(card, tip, 22, 22, 280);
 
             return card;
         }
@@ -829,48 +1073,49 @@ namespace WindowsFontTuner
             _dashboardPackageNoteLabel.AutoSize = false;
             _dashboardPackageNoteLabel.BackColor = Color.Transparent;
             _dashboardPackageNoteLabel.Location = new Point(22, 54);
-            _dashboardPackageNoteLabel.Size = new Size(360, 66);
+            _dashboardPackageNoteLabel.Size = new Size(300, 64);
             _dashboardPackageNoteLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _dashboardPackageNoteLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Regular);
             _dashboardPackageNoteLabel.ForeColor = UiPalette.TextSecondary;
             _dashboardPackageNoteLabel.Text = "当前预设对应的字体包信息会显示在这里。";
-            _dashboardPackageNoteLabel.UseCompatibleTextRendering = true;
+            _dashboardPackageNoteLabel.UseCompatibleTextRendering = false;
             card.Controls.Add(_dashboardPackageNoteLabel);
 
             FlowLayoutPanel actions = new FlowLayoutPanel();
             actions.AutoSize = true;
             actions.BackColor = Color.Transparent;
             actions.Location = new Point(22, 126);
-            actions.MaximumSize = new Size(360, 0);
+            actions.MaximumSize = new Size(280, 0);
             actions.WrapContents = true;
             card.Controls.Add(actions);
+            BindFlowWidth(card, actions, 22, 22, 220);
 
-            ModernButton installButton = BuildButton("安装当前字体", InstallFontsButton_Click, ModernButtonStyle.Primary, 116);
+            ModernButton installButton = BuildButton("安装当前字体", InstallFontsButton_Click, ModernButtonStyle.Primary, 0);
             installButton.Margin = new Padding(0, 0, 8, 8);
             actions.Controls.Add(installButton);
 
-            ModernButton backupButton = BuildButton("创建备份", BackupButton_Click, ModernButtonStyle.Secondary, 108);
-            backupButton.Margin = new Padding(0, 0, 8, 8);
+            ModernButton backupButton = BuildButton("创建备份", BackupButton_Click, ModernButtonStyle.Secondary, 0);
+            backupButton.Margin = new Padding(0);
             actions.Controls.Add(backupButton);
-
-            ModernButton renderButton = BuildButton("查看微调参数", delegate { ShowPage(AppPage.Rendering); }, ModernButtonStyle.Ghost, 122);
-            renderButton.Margin = new Padding(0, 0, 8, 8);
-            actions.Controls.Add(renderButton);
 
             ModernCardPanel tips = CreateCard(false, 24, Color.FromArgb(246, 249, 253));
             tips.ShowShadow = false;
             tips.Location = new Point(22, 198);
-            tips.Size = new Size(360, 96);
+            tips.Size = new Size(300, 110);
             tips.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             tips.Padding = new Padding(16);
             card.Controls.Add(tips);
 
-            Label tipsTitle = CreateSectionEyebrow("为什么这样排", UiPalette.AccentTextSoft);
+            Label tipsTitle = CreateSectionEyebrow("使用顺序", UiPalette.AccentTextSoft);
             tipsTitle.Location = new Point(16, 12);
             tips.Controls.Add(tipsTitle);
 
-            Label tipsBody = CreateMutedLabel("先选预设，再安装字体，最后一键应用；要回退时直接恢复快照。", 16, 36, 326, 46);
+            Label tipsBody = CreateMutedLabel("先选预设，再装字体，最后一键应用。", 16, 36, 268, 46);
             tips.Controls.Add(tipsBody);
+            BindWrappedLabel(card, _dashboardPackageNoteLabel, 22, 54, 22, 240, 52);
+            BindFlowWidth(card, actions, 22, 22, 240);
+            BindControlWidth(card, tips, 22, 22, 240);
+            BindWrappedLabel(tips, tipsBody, 16, 36, 16, 208, 36);
 
             return card;
         }
@@ -884,15 +1129,18 @@ namespace WindowsFontTuner
 
             TableLayoutPanel topRow = new TableLayoutPanel();
             topRow.Dock = DockStyle.Top;
-            topRow.Height = 548;
+            topRow.Height = 596;
             topRow.Margin = new Padding(0, 0, 0, 18);
             topRow.BackColor = Color.Transparent;
             topRow.ColumnCount = 2;
             topRow.RowCount = 1;
             topRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
             topRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
-            topRow.Controls.Add(BuildPresetCard(), 0, 0);
-            topRow.Controls.Add(BuildStatusCard(), 1, 0);
+            Control presetCard = BuildPresetCard();
+            Control statusCard = BuildStatusCard();
+            topRow.Controls.Add(presetCard, 0, 0);
+            topRow.Controls.Add(statusCard, 1, 0);
+            ConfigureResponsiveRow(topRow, presetCard, statusCard, 1220, 596, 980, 58f, 42f);
             canvas.Controls.Add(topRow, 0, 1);
 
             canvas.Controls.Add(BuildMappingCard(), 0, 2);
@@ -928,53 +1176,60 @@ namespace WindowsFontTuner
             _presetComboBox.FlatStyle = FlatStyle.Flat;
             _presetComboBox.Font = new Font(Font.FontFamily, 10.4f, FontStyle.Bold);
             _presetComboBox.Location = new Point(68, 96);
-            _presetComboBox.Size = new Size(344, 34);
+            _presetComboBox.Size = new Size(250, 34);
             _presetComboBox.SelectedIndexChanged += PresetComboBox_SelectedIndexChanged;
             card.Controls.Add(_presetComboBox);
 
             ModernCardPanel hintCard = CreateCard(false, 22, Color.FromArgb(248, 250, 253));
             hintCard.ShowShadow = false;
             hintCard.Location = new Point(22, 150);
-            hintCard.Size = new Size(560, 88);
+            hintCard.Size = new Size(448, 98);
             hintCard.Padding = new Padding(16);
             card.Controls.Add(hintCard);
+            BindControlWidth(card, hintCard, 22, 22, 320);
 
             Label hintTitle = CreateSectionEyebrow("字体状态", UiPalette.AccentTextSoft);
             hintTitle.Location = new Point(16, 12);
             hintCard.Controls.Add(hintTitle);
 
             _fontHintLabel = CreateMutedLabel("正在读取当前预设需要的字体…", 16, 34, 528, 36);
+            _fontHintLabel.Size = new Size(416, 48);
             hintCard.Controls.Add(_fontHintLabel);
+            BindWrappedLabel(hintCard, _fontHintLabel, 16, 34, 16, 260, 40);
 
             FlowLayoutPanel actions = new FlowLayoutPanel();
             actions.AutoSize = true;
             actions.BackColor = Color.Transparent;
             actions.Location = new Point(22, 248);
-            actions.MaximumSize = new Size(560, 0);
+            actions.MaximumSize = new Size(448, 0);
             actions.WrapContents = true;
             card.Controls.Add(actions);
+            BindFlowWidth(card, actions, 22, 22, 320);
 
-            actions.Controls.Add(BuildButton("应用当前预设", ApplyButton_Click, ModernButtonStyle.Primary, 128));
-            _installFontsButton = BuildButton("安装所需字体", InstallFontsButton_Click, ModernButtonStyle.Secondary, 116);
+            actions.Controls.Add(BuildButton("应用预设", ApplyButton_Click, ModernButtonStyle.Primary, 0));
+            _installFontsButton = BuildButton("安装字体", InstallFontsButton_Click, ModernButtonStyle.Secondary, 0);
             actions.Controls.Add(_installFontsButton);
-            actions.Controls.Add(BuildButton("创建备份", BackupButton_Click, ModernButtonStyle.Secondary, 104));
-            actions.Controls.Add(BuildButton("恢复最近备份", RestoreButton_Click, ModernButtonStyle.Secondary, 128));
-            actions.Controls.Add(BuildButton("恢复 Windows 默认", ResetWindowsDefaultsButton_Click, ModernButtonStyle.Ghost, 146));
+            actions.Controls.Add(BuildButton("创建备份", BackupButton_Click, ModernButtonStyle.Secondary, 0));
+            actions.Controls.Add(BuildButton("恢复最近", RestoreButton_Click, ModernButtonStyle.Secondary, 0));
+            actions.Controls.Add(BuildButton("恢复默认", ResetWindowsDefaultsButton_Click, ModernButtonStyle.Ghost, 0));
 
             ModernCardPanel descriptionCard = CreateCard(false, 24, UiPalette.CardAltBackground);
             descriptionCard.ShowShadow = false;
-            descriptionCard.Location = new Point(22, 338);
-            descriptionCard.Size = new Size(560, 118);
+            descriptionCard.Location = new Point(22, 390);
+            descriptionCard.Size = new Size(448, 132);
             descriptionCard.Padding = new Padding(16);
             card.Controls.Add(descriptionCard);
+            BindControlWidth(card, descriptionCard, 22, 22, 320);
 
             Label descriptionTitle = CreateSectionEyebrow("当前预设说明", UiPalette.TextSecondary);
             descriptionTitle.Location = new Point(16, 12);
             descriptionCard.Controls.Add(descriptionTitle);
 
             _descriptionLabel = CreateMutedLabel("正在加载说明…", 16, 36, 528, 64);
+            _descriptionLabel.Size = new Size(416, 78);
             _descriptionLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Regular);
             descriptionCard.Controls.Add(_descriptionLabel);
+            BindWrappedLabel(descriptionCard, _descriptionLabel, 16, 36, 16, 260, 56);
 
             return card;
         }
@@ -991,8 +1246,10 @@ namespace WindowsFontTuner
             card.Controls.Add(title);
 
             _replacementAdminLabel = CreateMutedLabel("正在读取权限状态…", 22, 56, 388, 42);
+            _replacementAdminLabel.Size = new Size(308, 56);
             _replacementAdminLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
             card.Controls.Add(_replacementAdminLabel);
+            BindWrappedLabel(card, _replacementAdminLabel, 22, 56, 22, 240, 40);
 
             _rebuildCacheCheckBox = new CheckBox();
             _rebuildCacheCheckBox.AutoSize = true;
@@ -1016,31 +1273,35 @@ namespace WindowsFontTuner
 
             ModernCardPanel packageCard = CreateCard(false, 22, UiPalette.CardAltBackground);
             packageCard.ShowShadow = false;
-            packageCard.Location = new Point(22, 176);
-            packageCard.Size = new Size(388, 188);
+            packageCard.Location = new Point(22, 178);
+            packageCard.Size = new Size(308, 174);
             packageCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             packageCard.Padding = new Padding(16);
             card.Controls.Add(packageCard);
+            BindControlWidth(card, packageCard, 22, 22, 260);
 
             Label packageTitle = CreateSectionEyebrow("内置字体包", UiPalette.AccentTextSoft);
             packageTitle.Location = new Point(16, 12);
             packageCard.Controls.Add(packageTitle);
 
             _packageInfoLabel = CreateMutedLabel("当前预设对应的字体包信息会显示在这里。", 16, 36, 356, 124);
+            _packageInfoLabel.Size = new Size(276, 104);
             _packageInfoLabel.Font = new Font(Font.FontFamily, 9.8f, FontStyle.Regular);
             packageCard.Controls.Add(_packageInfoLabel);
+            BindWrappedLabel(packageCard, _packageInfoLabel, 16, 36, 16, 220, 86);
 
             FlowLayoutPanel resources = new FlowLayoutPanel();
             resources.AutoSize = true;
             resources.BackColor = Color.Transparent;
-            resources.Location = new Point(22, 376);
-            resources.MaximumSize = new Size(388, 0);
+            resources.Location = new Point(22, 370);
+            resources.MaximumSize = new Size(308, 0);
             resources.WrapContents = true;
             card.Controls.Add(resources);
+            BindFlowWidth(card, resources, 22, 22, 240);
 
-            resources.Controls.Add(BuildButton("打开字体包目录", OpenFontPackagesButton_Click, ModernButtonStyle.Ghost, 118));
-            resources.Controls.Add(BuildButton("打开预设目录", OpenPresetsButton_Click, ModernButtonStyle.Ghost, 114));
-            resources.Controls.Add(BuildButton("打开备份目录", OpenBackupsButton_Click, ModernButtonStyle.Ghost, 118));
+            resources.Controls.Add(BuildButton("字体包目录", OpenFontPackagesButton_Click, ModernButtonStyle.Ghost, 0));
+            resources.Controls.Add(BuildButton("预设目录", OpenPresetsButton_Click, ModernButtonStyle.Ghost, 0));
+            resources.Controls.Add(BuildButton("备份目录", OpenBackupsButton_Click, ModernButtonStyle.Ghost, 0));
 
             return card;
         }
@@ -1049,7 +1310,7 @@ namespace WindowsFontTuner
         {
             ModernCardPanel card = CreateCard(false, 28, UiPalette.CardBackground);
             card.Dock = DockStyle.Top;
-            card.Height = 312;
+            card.Height = 348;
             card.Margin = new Padding(0, 0, 0, 12);
             card.Padding = new Padding(22);
 
@@ -1062,12 +1323,14 @@ namespace WindowsFontTuner
 
             _mappingFlow = new FlowLayoutPanel();
             _mappingFlow.Location = new Point(22, 92);
-            _mappingFlow.Size = new Size(1050, 180);
+            _mappingFlow.Size = new Size(840, 220);
             _mappingFlow.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            _mappingFlow.AutoScroll = true;
+            _mappingFlow.AutoScroll = false;
             _mappingFlow.WrapContents = true;
             _mappingFlow.BackColor = Color.Transparent;
             card.Controls.Add(_mappingFlow);
+            BindControlWidth(card, sub, 22, 22, 300);
+            BindControlWidth(card, _mappingFlow, 22, 22, 320);
 
             return card;
         }
@@ -1081,15 +1344,18 @@ namespace WindowsFontTuner
 
             TableLayoutPanel mainRow = new TableLayoutPanel();
             mainRow.Dock = DockStyle.Top;
-            mainRow.Height = 470;
+            mainRow.Height = 520;
             mainRow.Margin = new Padding(0, 0, 0, 18);
             mainRow.BackColor = Color.Transparent;
             mainRow.ColumnCount = 2;
             mainRow.RowCount = 1;
             mainRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
             mainRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
-            mainRow.Controls.Add(BuildRenderingConfigCard(), 0, 0);
-            mainRow.Controls.Add(BuildRenderingPreviewCard(), 1, 0);
+            Control configCard = BuildRenderingConfigCard();
+            Control previewCard = BuildRenderingPreviewCard();
+            mainRow.Controls.Add(configCard, 0, 0);
+            mainRow.Controls.Add(previewCard, 1, 0);
+            ConfigureResponsiveRow(mainRow, configCard, previewCard, 1240, 520, 860, 42f, 58f);
             canvas.Controls.Add(mainRow, 0, 1);
 
             return page;
@@ -1106,12 +1372,12 @@ namespace WindowsFontTuner
             title.Location = new Point(22, 20);
             card.Controls.Add(title);
 
-            Label sub = CreateMutedLabel("这里展示的是当前预设会写入的关键参数。", 22, 54, 380, 20);
+            Label sub = CreateMutedLabel("这里展示的是当前预设会写入的关键参数。", 22, 54, 320, 20);
             card.Controls.Add(sub);
 
             TableLayoutPanel grid = new TableLayoutPanel();
             grid.Location = new Point(22, 92);
-            grid.Size = new Size(394, 248);
+            grid.Size = new Size(320, 232);
             grid.BackColor = Color.Transparent;
             grid.RowCount = 2;
             grid.ColumnCount = 2;
@@ -1129,7 +1395,7 @@ namespace WindowsFontTuner
             ModernCardPanel faceCard = CreateCard(false, 22, UiPalette.CardAltBackground);
             faceCard.ShowShadow = false;
             faceCard.Location = new Point(22, 356);
-            faceCard.Size = new Size(394, 52);
+            faceCard.Size = new Size(320, 56);
             faceCard.Padding = new Padding(16, 10, 16, 10);
             card.Controls.Add(faceCard);
 
@@ -1138,12 +1404,17 @@ namespace WindowsFontTuner
             faceCard.Controls.Add(faceTitle);
 
             _renderFaceValueLabel = new Label();
-            _renderFaceValueLabel.AutoSize = true;
+            _renderFaceValueLabel.AutoSize = false;
             _renderFaceValueLabel.BackColor = Color.Transparent;
             _renderFaceValueLabel.Location = new Point(16, 26);
+            _renderFaceValueLabel.Size = new Size(288, 22);
             _renderFaceValueLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
             _renderFaceValueLabel.ForeColor = UiPalette.TextPrimary;
+            _renderFaceValueLabel.AutoEllipsis = true;
             faceCard.Controls.Add(_renderFaceValueLabel);
+            BindWrappedLabel(card, sub, 22, 54, 22, 240, 20);
+            BindControlWidth(card, faceCard, 22, 22, 240);
+            BindControlWidth(faceCard, _renderFaceValueLabel, 16, 16, 180);
 
             return card;
         }
@@ -1159,12 +1430,13 @@ namespace WindowsFontTuner
             title.Location = new Point(22, 20);
             card.Controls.Add(title);
 
-            Label sub = CreateMutedLabel("左边是当前系统消息字体基准，右边是当前预设的目标效果。", 22, 54, 520, 20);
+            Label sub = CreateMutedLabel("左边是当前系统消息字体基准，右边是当前预设的目标效果。", 22, 54, 430, 20);
             card.Controls.Add(sub);
+            BindWrappedLabel(card, sub, 22, 54, 22, 280, 20);
 
             TableLayoutPanel split = new TableLayoutPanel();
             split.Location = new Point(22, 92);
-            split.Size = new Size(610, 300);
+            split.Size = new Size(420, 318);
             split.BackColor = Color.Transparent;
             split.ColumnCount = 2;
             split.RowCount = 1;
@@ -1172,11 +1444,16 @@ namespace WindowsFontTuner
             split.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
             card.Controls.Add(split);
 
-            split.Controls.Add(BuildSamplePane("当前系统样张", false, out _renderCurrentBodyLabel), 0, 0);
-            split.Controls.Add(BuildSamplePane("当前预设样张", true, out _renderTunedBodyLabel), 1, 0);
+            Control currentPane = BuildSamplePane("当前系统样张", false, out _renderCurrentBodyLabel);
+            Control tunedPane = BuildSamplePane("当前预设样张", true, out _renderTunedBodyLabel);
+            split.Controls.Add(currentPane, 0, 0);
+            split.Controls.Add(tunedPane, 1, 0);
+            BindControlWidth(card, split, 22, 22, 340);
+            ConfigureResponsivePreviewSplit(split, currentPane, tunedPane, 800, 318, 410);
 
-            _renderPreviewMetaLabel = CreateMutedLabel("这里只负责帮助你看清字重、字宽和正文观感。", 22, 402, 610, 20);
+            _renderPreviewMetaLabel = CreateMutedLabel("这里只帮你确认字重、字宽和正文字体观感。", 22, 420, 420, 36);
             card.Controls.Add(_renderPreviewMetaLabel);
+            BindWrappedLabel(card, _renderPreviewMetaLabel, 22, 420, 22, 280, 28);
 
             return card;
         }
@@ -1190,15 +1467,18 @@ namespace WindowsFontTuner
 
             TableLayoutPanel topRow = new TableLayoutPanel();
             topRow.Dock = DockStyle.Top;
-            topRow.Height = 320;
+            topRow.Height = 356;
             topRow.Margin = new Padding(0, 0, 0, 18);
             topRow.BackColor = Color.Transparent;
             topRow.ColumnCount = 2;
             topRow.RowCount = 1;
             topRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 52f));
             topRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 48f));
-            topRow.Controls.Add(BuildSettingsCard(), 0, 0);
-            topRow.Controls.Add(BuildResourcesCard(), 1, 0);
+            Control settingsCard = BuildSettingsCard();
+            Control resourcesCard = BuildResourcesCard();
+            topRow.Controls.Add(settingsCard, 0, 0);
+            topRow.Controls.Add(resourcesCard, 1, 0);
+            ConfigureResponsiveRow(topRow, settingsCard, resourcesCard, 1200, 356, 620, 52f, 48f);
             canvas.Controls.Add(topRow, 0, 1);
 
             canvas.Controls.Add(BuildBackupsCard(), 0, 2);
@@ -1227,6 +1507,7 @@ namespace WindowsFontTuner
             card.Controls.Add(adminTitle);
 
             _settingsAdminLabel = CreateMutedLabel("正在读取权限状态…", 22, 122, 400, 42);
+            _settingsAdminLabel.Size = new Size(360, 60);
             _settingsAdminLabel.Font = new Font(Font.FontFamily, 10f, FontStyle.Bold);
             card.Controls.Add(_settingsAdminLabel);
 
@@ -1251,20 +1532,25 @@ namespace WindowsFontTuner
             card.Controls.Add(_settingsRestartExplorerCheckBox);
 
             _settingsUpdateLabel = CreateMutedLabel("更新信息会显示在这里。", 22, 244, 400, 42);
+            _settingsUpdateLabel.Size = new Size(360, 42);
             _settingsUpdateLabel.Font = new Font(Font.FontFamily, 9.8f, FontStyle.Regular);
             card.Controls.Add(_settingsUpdateLabel);
+            BindWrappedLabel(card, _settingsAdminLabel, 22, 122, 22, 240, 40);
+            BindWrappedLabel(card, _settingsUpdateLabel, 22, 244, 22, 240, 24);
 
             FlowLayoutPanel actions = new FlowLayoutPanel();
             actions.AutoSize = true;
             actions.BackColor = Color.Transparent;
             actions.Location = new Point(22, 286);
-            actions.WrapContents = false;
+            actions.MaximumSize = new Size(360, 0);
+            actions.WrapContents = true;
             card.Controls.Add(actions);
+            BindFlowWidth(card, actions, 22, 22, 240);
 
-            _settingsCheckUpdatesButton = BuildButton("检查更新", CheckUpdatesButton_Click, ModernButtonStyle.Primary, 102);
+            _settingsCheckUpdatesButton = BuildButton("检查更新", CheckUpdatesButton_Click, ModernButtonStyle.Primary, 0);
             actions.Controls.Add(_settingsCheckUpdatesButton);
-            actions.Controls.Add(BuildButton("打开发布页", OpenUpdatePageButton_Click, ModernButtonStyle.Secondary, 108));
-            actions.Controls.Add(BuildButton("打开仓库", OpenRepositoryButton_Click, ModernButtonStyle.Ghost, 96));
+            actions.Controls.Add(BuildButton("发布页", OpenUpdatePageButton_Click, ModernButtonStyle.Secondary, 0));
+            actions.Controls.Add(BuildButton("仓库", OpenRepositoryButton_Click, ModernButtonStyle.Ghost, 0));
 
             return card;
         }
@@ -1280,21 +1566,23 @@ namespace WindowsFontTuner
             title.Location = new Point(22, 20);
             card.Controls.Add(title);
 
-            Label sub = CreateMutedLabel("不管是字体包、预设还是快照，都能直接从这里打开。", 22, 54, 360, 20);
+            Label sub = CreateMutedLabel("不管是字体包、预设还是快照，都能直接从这里打开。", 22, 54, 300, 20);
             card.Controls.Add(sub);
 
             FlowLayoutPanel actions = new FlowLayoutPanel();
             actions.AutoSize = true;
             actions.BackColor = Color.Transparent;
             actions.Location = new Point(22, 96);
-            actions.MaximumSize = new Size(360, 0);
+            actions.MaximumSize = new Size(300, 0);
             actions.WrapContents = true;
             card.Controls.Add(actions);
+            BindWrappedLabel(card, sub, 22, 54, 22, 220, 20);
+            BindFlowWidth(card, actions, 22, 22, 220);
 
-            actions.Controls.Add(BuildButton("打开字体包目录", OpenFontPackagesButton_Click, ModernButtonStyle.Secondary, 118));
-            actions.Controls.Add(BuildButton("打开预设目录", OpenPresetsButton_Click, ModernButtonStyle.Secondary, 112));
-            actions.Controls.Add(BuildButton("打开备份目录", OpenBackupsButton_Click, ModernButtonStyle.Secondary, 118));
-            actions.Controls.Add(BuildButton("GitHub 发布页", OpenReleasePageButton_Click, ModernButtonStyle.Ghost, 112));
+            actions.Controls.Add(BuildButton("字体包目录", OpenFontPackagesButton_Click, ModernButtonStyle.Secondary, 0));
+            actions.Controls.Add(BuildButton("预设目录", OpenPresetsButton_Click, ModernButtonStyle.Secondary, 0));
+            actions.Controls.Add(BuildButton("备份目录", OpenBackupsButton_Click, ModernButtonStyle.Secondary, 0));
+            actions.Controls.Add(BuildButton("发布页", OpenReleasePageButton_Click, ModernButtonStyle.Ghost, 0));
 
             return card;
         }
@@ -1303,7 +1591,7 @@ namespace WindowsFontTuner
         {
             ModernCardPanel card = CreateCard(false, 28, UiPalette.CardBackground);
             card.Dock = DockStyle.Top;
-            card.Height = 272;
+            card.Height = 336;
             card.Margin = new Padding(0, 0, 0, 18);
             card.Padding = new Padding(22);
 
@@ -1313,23 +1601,25 @@ namespace WindowsFontTuner
 
             _settingsBackupHintLabel = CreateMutedLabel("最近的备份记录会显示在这里。", 22, 54, 760, 20);
             card.Controls.Add(_settingsBackupHintLabel);
+            BindWrappedLabel(card, _settingsBackupHintLabel, 22, 54, 22, 300, 20);
 
             FlowLayoutPanel actions = new FlowLayoutPanel();
             actions.AutoSize = true;
             actions.BackColor = Color.Transparent;
             actions.Location = new Point(22, 88);
-            actions.MaximumSize = new Size(800, 0);
+            actions.MaximumSize = new Size(640, 0);
             actions.WrapContents = true;
             card.Controls.Add(actions);
+            BindFlowWidth(card, actions, 22, 22, 300);
 
-            actions.Controls.Add(BuildButton("新建备份", BackupButton_Click, ModernButtonStyle.Primary, 98));
-            actions.Controls.Add(BuildButton("恢复最近备份", RestoreButton_Click, ModernButtonStyle.Secondary, 128));
-            actions.Controls.Add(BuildButton("恢复 Windows 默认", ResetWindowsDefaultsButton_Click, ModernButtonStyle.Secondary, 146));
-            actions.Controls.Add(BuildButton("修复系统字体", RepairSystemFontsButton_Click, ModernButtonStyle.Ghost, 118));
+            actions.Controls.Add(BuildButton("新建备份", BackupButton_Click, ModernButtonStyle.Primary, 0));
+            actions.Controls.Add(BuildButton("恢复最近", RestoreButton_Click, ModernButtonStyle.Secondary, 0));
+            actions.Controls.Add(BuildButton("恢复默认", ResetWindowsDefaultsButton_Click, ModernButtonStyle.Secondary, 0));
+            actions.Controls.Add(BuildButton("修复字体", RepairSystemFontsButton_Click, ModernButtonStyle.Ghost, 0));
 
             _backupListPanel = new FlowLayoutPanel();
             _backupListPanel.Location = new Point(22, 140);
-            _backupListPanel.Size = new Size(1048, 108);
+            _backupListPanel.Size = new Size(1048, 160);
             _backupListPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _backupListPanel.AutoScroll = true;
             _backupListPanel.WrapContents = false;
@@ -1337,6 +1627,7 @@ namespace WindowsFontTuner
             _backupListPanel.BackColor = Color.Transparent;
             _backupListPanel.Resize += BackupListPanel_Resize;
             card.Controls.Add(_backupListPanel);
+            BindControlWidth(card, _backupListPanel, 22, 22, 300);
 
             return card;
         }
@@ -1436,10 +1727,11 @@ namespace WindowsFontTuner
             title.Location = new Point(16, 12);
             pane.Controls.Add(title);
 
-            bodyLabel = CreateMutedLabel("敏捷的棕色狐狸\r\nAa 0123456789\r\nThe quick brown fox.", 16, 40, 250, 198);
-            bodyLabel.Font = new Font(Font.FontFamily, 13.6f, emphasize ? FontStyle.Bold : FontStyle.Regular);
+            bodyLabel = CreateMutedLabel("敏捷的棕色狐狸\r\nAa 0123456789\r\nThe quick brown fox.", 16, 40, 150, 180);
+            bodyLabel.Font = new Font(Font.FontFamily, 11.2f, emphasize ? FontStyle.Bold : FontStyle.Regular);
             bodyLabel.ForeColor = UiPalette.TextPrimary;
             pane.Controls.Add(bodyLabel);
+            BindWrappedLabel(pane, bodyLabel, 16, 40, 16, 120, 120);
 
             return pane;
         }
@@ -1448,21 +1740,25 @@ namespace WindowsFontTuner
         {
             Panel intro = new Panel();
             intro.Dock = DockStyle.Top;
-            intro.Height = 78;
+            intro.Height = 118;
             intro.Margin = new Padding(0, 0, 0, 18);
             intro.BackColor = Color.Transparent;
 
             Label title = new Label();
-            title.AutoSize = true;
+            title.AutoSize = false;
             title.BackColor = Color.Transparent;
-            title.Font = new Font(Font.FontFamily, 20f, FontStyle.Bold);
+            title.Font = new Font(Font.FontFamily, 17.2f, FontStyle.Bold);
             title.ForeColor = UiPalette.TextPrimary;
             title.Location = new Point(0, 0);
+            title.Size = new Size(760, 40);
+            title.AutoEllipsis = true;
             title.Text = titleText;
             intro.Controls.Add(title);
+            BindControlWidth(intro, title, 0, 0, 320);
 
-            Label sub = CreateMutedLabel(description, 0, 40, 900, 22);
+            Label sub = CreateMutedLabel(description, 0, 52, 760, 36);
             intro.Controls.Add(sub);
+            BindWrappedLabel(intro, sub, 0, 52, 0, 320, 20);
 
             return intro;
         }
@@ -1572,8 +1868,8 @@ namespace WindowsFontTuner
         {
             bool isAdmin = _service.IsAdministrator();
             string text = isAdmin
-                ? "管理员模式已启用，可以直接备份、应用和恢复系统字体设置。"
-                : "当前不是管理员模式。要真正写入系统字体设置，请右键“以管理员身份运行”。";
+                ? "管理员模式已启用，可直接应用和备份。"
+                : "当前不是管理员模式，应用前请右键以管理员身份运行。";
             Color color = isAdmin ? UiPalette.Success : UiPalette.Warning;
 
             if (_sidebarStatusLabel != null)
@@ -1721,7 +2017,7 @@ namespace WindowsFontTuner
             {
                 _dashboardHeroSupportLabel.Text =
                     "当前选中「" + compactPresetName + "」，" +
-                    (missingFonts.Count == 0 ? "字体已经齐了，可以直接应用。" : "还缺 " + missingFonts.Count + " 款字体，建议先安装后再应用。");
+                    (missingFonts.Count == 0 ? "字体已齐，可以直接应用。" : "还缺 " + missingFonts.Count + " 款字体，先安装再应用。");
             }
 
             if (_dashboardPreviewTitleLabel != null)
@@ -1770,7 +2066,7 @@ namespace WindowsFontTuner
                 return;
             }
 
-            foreach (KeyValuePair<string, string> pair in preset.FontSubstitutes.OrderBy(function => function.Key).Take(14))
+            foreach (KeyValuePair<string, string> pair in preset.FontSubstitutes.OrderBy(function => function.Key).Take(8))
             {
                 _mappingFlow.Controls.Add(CreateMappingPreviewCard(pair.Key, pair.Value));
             }
@@ -1783,7 +2079,7 @@ namespace WindowsFontTuner
             ModernCardPanel card = CreateCard(false, 20, UiPalette.CardAltBackground);
             card.ShowShadow = false;
             card.BorderColor = UiPalette.Border;
-            card.Size = new Size(240, 92);
+            card.Size = new Size(156, 92);
             card.Margin = new Padding(0, 0, 10, 10);
             card.Padding = new Padding(14);
 
@@ -1791,7 +2087,7 @@ namespace WindowsFontTuner
             sourceLabel.Location = new Point(14, 12);
             card.Controls.Add(sourceLabel);
 
-            Label sourceValue = CreateMutedLabel(sourceName, 14, 30, 210, 20);
+            Label sourceValue = CreateMutedLabel(sourceName, 14, 30, 126, 20);
             sourceValue.Font = new Font(Font.FontFamily, 9.6f, FontStyle.Bold);
             sourceValue.ForeColor = UiPalette.TextPrimary;
             sourceValue.AutoEllipsis = true;
@@ -1802,7 +2098,7 @@ namespace WindowsFontTuner
             arrow.ForeColor = UiPalette.TextMuted;
             card.Controls.Add(arrow);
 
-            Label targetValue = CreateMutedLabel(targetName, 34, 54, 190, 22);
+            Label targetValue = CreateMutedLabel(targetName, 34, 54, 106, 22);
             targetValue.Font = new Font(Font.FontFamily, 9.4f, FontStyle.Bold);
             targetValue.ForeColor = UiPalette.AccentTextSoft;
             targetValue.AutoEllipsis = true;
@@ -1845,13 +2141,13 @@ namespace WindowsFontTuner
 
             if (_renderCurrentBodyLabel != null)
             {
-                _renderCurrentBodyLabel.Font = UiTypography.Create(13.6f, FontStyle.Regular);
+                _renderCurrentBodyLabel.Font = UiTypography.Create(12f, FontStyle.Regular);
                 _renderCurrentBodyLabel.Text = "敏捷的棕色狐狸\r\nAa 0123456789\r\nThe quick brown fox.";
             }
 
             if (_renderTunedBodyLabel != null)
             {
-                _renderTunedBodyLabel.Font = CreatePreviewFont(preset, 14.6f);
+                _renderTunedBodyLabel.Font = CreatePreviewFont(preset, 12.8f);
                 _renderTunedBodyLabel.Text = "敏捷的棕色狐狸\r\nAa 0123456789\r\nThe quick brown fox.";
             }
 
@@ -2151,7 +2447,10 @@ namespace WindowsFontTuner
 
             foreach (Control control in _backupListPanel.Controls)
             {
-                control.Width = width;
+                if (control.Width != width)
+                {
+                    control.Width = width;
+                }
             }
         }
 
@@ -2190,11 +2489,14 @@ namespace WindowsFontTuner
                 return "当前预设没有可用的内置字体包。";
             }
 
-            return
-                package.Name + Environment.NewLine +
-                SafeText(package.Description, "暂无额外描述。") + Environment.NewLine + Environment.NewLine +
-                "适合人群：" + SafeText(package.RecommendedFor, "未提供说明。") + Environment.NewLine +
-                "授权方式：" + SafeText(package.LicenseName, "未提供说明。");
+            string summary = package.Name + Environment.NewLine + SafeText(package.Description, "暂无说明。");
+
+            if (!string.IsNullOrWhiteSpace(package.LicenseName))
+            {
+                summary += Environment.NewLine + "授权：" + package.LicenseName;
+            }
+
+            return summary;
         }
 
         private static string DescribeRenderingMode(FontPreset preset)

@@ -1,9 +1,9 @@
 {
-  "version": "0.5.4",
-  "tag": "v0.5.4",
-  "name": "Windows全局字体替换器 v0.5.4",
-  "releaseUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/tag/v0.5.4",
-  "downloadUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/download/v0.5.4/WindowsFontTuner-Setup-v0.5.4.exe",
-  "publishedAt": "2026-04-05T14:45:00Z",
-  "notes": "重新整理页面布局，压缩拥挤文案，删掉字体微调页底部无用说明卡，并优化窗口拖拽缩放时的重绘性能。"
+  "version": "0.5.5",
+  "tag": "v0.5.5",
+  "name": "Windows全局字体替换器 v0.5.5",
+  "releaseUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/tag/v0.5.5",
+  "downloadUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/download/v0.5.5/WindowsFontTuner-Setup-v0.5.5.exe",
+  "publishedAt": "2026-04-05T16:40:00Z",
+  "notes": "修正多页布局在常见窗口宽度下的溢出和裁切，缩短按钮文案，收紧卡片信息密度，并优化拖拽缩放时的重绘卡顿。"
 }

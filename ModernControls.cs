@@ -334,6 +334,7 @@ namespace WindowsFontTuner
             TabStop = true;
             Cursor = Cursors.Hand;
             DoubleBuffered = true;
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
             Height = 38;
             Width = 132;
             Font = UiTypography.Create(9.3f, FontStyle.Regular);
@@ -387,7 +388,7 @@ namespace WindowsFontTuner
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.Clear(ResolveSurfaceColor());
 
-            Rectangle bounds = new Rectangle(1, 1, Width - 3, Height - 3);
+            Rectangle bounds = new Rectangle(0, 0, Width - 1, Height - 1);
             Color fill;
             Color border;
             Color textColor;
@@ -416,7 +417,7 @@ namespace WindowsFontTuner
             if (!Enabled)
             {
                 fill = Color.FromArgb(241, 244, 248);
-                border = Color.FromArgb(229, 234, 240);
+                border = fill;
                 textColor = UiPalette.TextMuted;
                 return;
             }
@@ -434,7 +435,7 @@ namespace WindowsFontTuner
                 fill = _pressed
                     ? Color.FromArgb(236, 241, 247)
                     : (_hovered ? Color.FromArgb(245, 248, 252) : ResolveSurfaceColor());
-                border = _hovered || _pressed ? UiPalette.Border : ResolveSurfaceColor();
+                border = fill;
                 textColor = UiPalette.TextSecondary;
                 return;
             }
@@ -442,7 +443,7 @@ namespace WindowsFontTuner
             fill = _pressed
                 ? Color.FromArgb(242, 246, 251)
                 : (_hovered ? Color.FromArgb(248, 250, 253) : UiPalette.CardBackground);
-            border = _hovered ? UiPalette.BorderStrong : UiPalette.Border;
+            border = fill;
             textColor = UiPalette.TextPrimary;
         }
 
@@ -452,6 +453,12 @@ namespace WindowsFontTuner
 
             while (current != null)
             {
+                ModernCardPanel panel = current as ModernCardPanel;
+                if (panel != null)
+                {
+                    return panel.UseGradient ? panel.GradientEndColor : panel.FillColor;
+                }
+
                 if (current.BackColor.A > 0 && current.BackColor != Color.Transparent)
                 {
                     return current.BackColor;
@@ -477,6 +484,7 @@ namespace WindowsFontTuner
             TabStop = true;
             Cursor = Cursors.Hand;
             DoubleBuffered = true;
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
             Height = 42;
             Width = 180;
             Font = UiTypography.Create(9.4f, FontStyle.Bold);
