@@ -159,7 +159,7 @@ namespace WindowsFontTuner
         private int _cornerRadius = 26;
         private bool _useGradient;
         private bool _showGlow;
-        private bool _showShadow = true;
+        private bool _showShadow;
         private Color _fillColor = UiPalette.CardBackground;
         private Color _gradientStartColor = UiPalette.HeroStart;
         private Color _gradientEndColor = UiPalette.HeroEnd;
@@ -168,7 +168,7 @@ namespace WindowsFontTuner
         public ModernCardPanel()
         {
             DoubleBuffered = true;
-            ResizeRedraw = true;
+            ResizeRedraw = false;
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             BackColor = Color.Transparent;
             Padding = new Padding(20);
@@ -180,7 +180,6 @@ namespace WindowsFontTuner
             set
             {
                 _cornerRadius = value;
-                UpdateRegion();
                 Invalidate();
             }
         }
@@ -255,12 +254,6 @@ namespace WindowsFontTuner
             }
         }
 
-        protected override void OnResize(EventArgs eventargs)
-        {
-            base.OnResize(eventargs);
-            UpdateRegion();
-        }
-
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -319,18 +312,6 @@ namespace WindowsFontTuner
             }
         }
 
-        private void UpdateRegion()
-        {
-            if (Width <= 0 || Height <= 0)
-            {
-                return;
-            }
-
-            using (GraphicsPath path = UiGeometry.CreateRoundedRectangle(new Rectangle(0, 0, Width, Height), _cornerRadius))
-            {
-                Region = new Region(path);
-            }
-        }
     }
 
     public enum ModernButtonStyle
