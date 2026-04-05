@@ -1,9 +1,9 @@
 {
-  "version": "0.5.2",
-  "tag": "v0.5.2",
-  "name": "Windows全局字体替换器 v0.5.2",
-  "releaseUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/tag/v0.5.2",
-  "downloadUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/download/v0.5.2/WindowsFontTuner-Setup-v0.5.2.exe",
-  "publishedAt": "2026-04-05T20:25:00Z",
-  "notes": "新增“恢复 Windows 默认”和“修复系统字体”入口，清理旧映射残留，并把恢复说明补齐。"
+  "version": "0.5.3",
+  "tag": "v0.5.3",
+  "name": "Windows全局字体替换器 v0.5.3",
+  "releaseUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/tag/v0.5.3",
+  "downloadUrl": "https://github.com/soberbw-hash/WindowsFontTuner/releases/download/v0.5.3/WindowsFontTuner-Setup-v0.5.3.exe",
+  "publishedAt": "2026-04-05T14:25:00Z",
+  "notes": "大幅降低窗口和卡片透明度，移除导致整窗发白的 Acrylic 叠加，优先保证文字可读性。"
 }

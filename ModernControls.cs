@@ -9,11 +9,11 @@ namespace WindowsFontTuner
 {
     internal static class UiPalette
     {
-        public static readonly Color WindowBackground = Color.FromArgb(164, 242, 246, 251);
-        public static readonly Color SidebarBackground = Color.FromArgb(184, 246, 249, 252);
+        public static readonly Color WindowBackground = Color.FromArgb(244, 247, 252);
+        public static readonly Color SidebarBackground = Color.FromArgb(249, 251, 254);
         public static readonly Color SidebarBorder = Color.FromArgb(225, 231, 239);
-        public static readonly Color CardBackground = Color.FromArgb(214, 252, 253, 255);
-        public static readonly Color CardAltBackground = Color.FromArgb(198, 247, 250, 253);
+        public static readonly Color CardBackground = Color.FromArgb(255, 255, 255);
+        public static readonly Color CardAltBackground = Color.FromArgb(249, 251, 254);
         public static readonly Color Border = Color.FromArgb(223, 229, 237);
         public static readonly Color BorderStrong = Color.FromArgb(210, 219, 230);
         public static readonly Color Accent = Color.FromArgb(37, 99, 235);
@@ -31,8 +31,8 @@ namespace WindowsFontTuner
         public static readonly Color WarningSoft = Color.FromArgb(255, 245, 229);
         public static readonly Color Danger = Color.FromArgb(188, 63, 63);
         public static readonly Color DangerSoft = Color.FromArgb(252, 238, 238);
-        public static readonly Color HeroStart = Color.FromArgb(210, 238, 245, 255);
-        public static readonly Color HeroEnd = Color.FromArgb(196, 250, 252, 255);
+        public static readonly Color HeroStart = Color.FromArgb(236, 243, 255);
+        public static readonly Color HeroEnd = Color.FromArgb(244, 249, 255);
     }
 
     internal static class UiTypography

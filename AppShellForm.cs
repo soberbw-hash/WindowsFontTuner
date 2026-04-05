@@ -94,7 +94,7 @@ namespace WindowsFontTuner
             Height = 920;
             MinimumSize = new Size(1180, 780);
             StartPosition = FormStartPosition.CenterScreen;
-            BackColor = Color.FromArgb(242, 246, 251);
+            BackColor = UiPalette.WindowBackground;
             Font = UiTypography.Create(9.2f, FontStyle.Regular);
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
 
@@ -116,8 +116,8 @@ namespace WindowsFontTuner
 
             using (LinearGradientBrush brush = new LinearGradientBrush(
                 bounds,
-                Color.FromArgb(124, 243, 247, 252),
-                Color.FromArgb(108, 232, 240, 249),
+                Color.FromArgb(244, 247, 252),
+                Color.FromArgb(236, 242, 250),
                 90f))
             {
                 e.Graphics.FillRectangle(brush, bounds);
@@ -125,8 +125,8 @@ namespace WindowsFontTuner
 
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            using (SolidBrush coolBrush = new SolidBrush(Color.FromArgb(16, UiPalette.Accent)))
-            using (SolidBrush warmBrush = new SolidBrush(Color.FromArgb(12, 81, 136, 214)))
+            using (SolidBrush coolBrush = new SolidBrush(Color.FromArgb(20, UiPalette.Accent)))
+            using (SolidBrush warmBrush = new SolidBrush(Color.FromArgb(14, 81, 136, 214)))
             {
                 e.Graphics.FillEllipse(coolBrush, new Rectangle(Width - 360, -110, 380, 380));
                 e.Graphics.FillEllipse(warmBrush, new Rectangle(-150, Height - 310, 300, 300));
@@ -305,7 +305,7 @@ namespace WindowsFontTuner
         {
             Panel bar = new Panel();
             bar.Dock = DockStyle.Fill;
-            bar.BackColor = Color.FromArgb(96, 255, 255, 255);
+            bar.BackColor = Color.FromArgb(248, 250, 253);
             bar.Padding = new Padding(24, 14, 24, 12);
             bar.Paint += delegate(object sender, PaintEventArgs e)
             {
@@ -2711,48 +2711,6 @@ namespace WindowsFontTuner
             catch
             {
             }
-
-            try
-            {
-                int useHostBackdropBrush = 1;
-                NativeMethods.DwmSetWindowAttribute(
-                    Handle,
-                    NativeMethods.DWMWA_USE_HOSTBACKDROPBRUSH,
-                    ref useHostBackdropBrush,
-                    Marshal.SizeOf(typeof(int)));
-            }
-            catch
-            {
-            }
-
-            try
-            {
-                NativeMethods.AccentPolicy accent = new NativeMethods.AccentPolicy();
-                accent.AccentState = NativeMethods.ACCENT_ENABLE_ACRYLICBLURBEHIND;
-                accent.GradientColor = NativeMethods.ToAbgr(Color.FromArgb(118, 245, 248, 252));
-
-                int accentStructSize = Marshal.SizeOf(accent);
-                IntPtr accentPtr = Marshal.AllocHGlobal(accentStructSize);
-
-                try
-                {
-                    Marshal.StructureToPtr(accent, accentPtr, false);
-
-                    NativeMethods.WindowCompositionAttributeData data = new NativeMethods.WindowCompositionAttributeData();
-                    data.Attribute = NativeMethods.WCA_ACCENT_POLICY;
-                    data.SizeOfData = accentStructSize;
-                    data.Data = accentPtr;
-
-                    NativeMethods.SetWindowCompositionAttribute(Handle, ref data);
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(accentPtr);
-                }
-            }
-            catch
-            {
-            }
         }
 
         private enum AppPage
@@ -2765,42 +2723,13 @@ namespace WindowsFontTuner
 
         private static class NativeMethods
         {
-            public const int DWMWA_USE_HOSTBACKDROPBRUSH = 17;
             public const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
             public const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
             public const int DWMWCP_ROUND = 2;
             public const int DWMSBT_MAINWINDOW = 2;
-            public const int DWMSBT_TRANSIENTWINDOW = 3;
-            public const int WCA_ACCENT_POLICY = 19;
-            public const int ACCENT_ENABLE_ACRYLICBLURBEHIND = 4;
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct AccentPolicy
-            {
-                public int AccentState;
-                public int AccentFlags;
-                public int GradientColor;
-                public int AnimationId;
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct WindowCompositionAttributeData
-            {
-                public int Attribute;
-                public IntPtr Data;
-                public int SizeOfData;
-            }
 
             [DllImport("dwmapi.dll")]
             public static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
-
-            [DllImport("user32.dll")]
-            public static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
-
-            public static int ToAbgr(Color color)
-            {
-                return (color.A << 24) | (color.B << 16) | (color.G << 8) | color.R;
-            }
         }
     }
 }
