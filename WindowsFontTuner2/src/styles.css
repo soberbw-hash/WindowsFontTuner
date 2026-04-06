@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "HarmonyOS Sans UI";
+  src: url("./assets/fonts/HarmonyOS_Sans_SC_Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "HarmonyOS Sans UI";
+  src: url("./assets/fonts/HarmonyOS_Sans_SC_Medium.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --app-bg: #eef3ff;
+  --app-surface: rgba(255, 255, 255, 0.58);
+  --app-card: rgba(255, 255, 255, 0.78);
+  --app-ink: #0f172a;
+  --app-muted: #54627d;
+  --app-blue: #2f6df6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+html,
+body {
+  background: transparent;
+  overflow: hidden;
+  font-family:
+    "HarmonyOS Sans UI",
+    "Segoe UI Variable",
+    "Microsoft YaHei UI",
+    sans-serif;
+  color: var(--app-ink);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(83, 126, 255, 0.16), transparent 26%),
+    radial-gradient(circle at 80% 18%, rgba(113, 191, 255, 0.18), transparent 22%),
+    linear-gradient(180deg, #f8fbff 0%, var(--app-bg) 100%);
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(36px);
+  z-index: 0;
+}
+
+body::before {
+  top: -6rem;
+  left: -4rem;
+  width: 20rem;
+  height: 20rem;
+  background: rgba(65, 108, 255, 0.18);
+}
+
+body::after {
+  right: -3rem;
+  bottom: -5rem;
+  width: 18rem;
+  height: 18rem;
+  background: rgba(65, 108, 255, 0.12);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(121, 141, 180, 0.35);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-tauri-drag-region] {
+  user-select: none;
+}

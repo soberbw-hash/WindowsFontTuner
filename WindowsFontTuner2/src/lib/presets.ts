@@ -1,0 +1,88 @@
+import type { PresetMeta } from "../types";
+
+export const presetCatalog: PresetMeta[] = [
+  {
+    id: "harmonyos-sc",
+    name: "HarmonyOS Sans SC",
+    tag: "现代干净",
+    vibe: "轻、稳、通透",
+    description:
+      "最稳的一套升级方案。它不会过分强调个性，但会把整个 Windows 的气质一下子拉干净。",
+    recommendedFor: "适合想要长期默认、几乎不翻车的人。",
+    chinesePreview: "把系统字体换成你真正想看的样子",
+    englishPreview: "Make Windows typography feel calm, clean and intentional.",
+    previewFont: "\"HarmonyOS Sans UI\", \"HarmonyOS Sans SC\", sans-serif",
+    accentClass: "from-[#6d7cff]/30 via-[#79b4ff]/16 to-transparent",
+    glowClass: "bg-[#5f7bff]",
+  },
+  {
+    id: "sarasa-ui-sc",
+    name: "更纱黑体",
+    tag: "沉稳扎实",
+    vibe: "硬朗、清晰、耐读",
+    description:
+      "笔画存在感更强，内容区更顶得住。看代码、文档和资源管理器时会更有抓地力。",
+    recommendedFor: "适合觉得默认 Windows 太细、太飘的人。",
+    chinesePreview: "让正文更结实，让信息更容易一眼读清",
+    englishPreview: "Sharper strokes, stronger presence, less visual fatigue.",
+    previewFont: "\"Sarasa UI SC\", \"HarmonyOS Sans UI\", sans-serif",
+    accentClass: "from-[#1f8f7b]/26 via-[#4dd2b0]/12 to-transparent",
+    glowClass: "bg-[#169a82]",
+  },
+  {
+    id: "source-han-sans-cn",
+    name: "思源黑体 CN",
+    tag: "中性克制",
+    vibe: "标准、安定、专业",
+    description:
+      "跨平台一致性最强的一套。它不像在炫技，更像把所有细节都做到了刚刚好。",
+    recommendedFor: "适合想要中性、严谨、长期耐看的系统风格。",
+    chinesePreview: "让文字回到秩序里，而不是飘在界面上",
+    englishPreview: "Balanced proportions for a quieter, more professional desktop.",
+    previewFont: "\"Source Han Sans CN\", \"HarmonyOS Sans UI\", sans-serif",
+    accentClass: "from-[#5b6f8e]/28 via-[#8da3c5]/10 to-transparent",
+    glowClass: "bg-[#61789d]",
+  },
+  {
+    id: "lxgw-wenkai",
+    name: "霞鹜文楷",
+    tag: "人文温润",
+    vibe: "书卷气、柔和、特别",
+    description:
+      "给 Windows 留一点情绪。它更像一本纸书，而不是工业面板，适合想要点个性的人。",
+    recommendedFor: "适合把电脑当写作台、阅读台的人。",
+    chinesePreview: "让冰冷的系统，也能带一点呼吸感",
+    englishPreview: "A softer, more literary texture for the everyday desktop.",
+    previewFont: "\"LXGW WenKai\", \"HarmonyOS Sans UI\", serif",
+    accentClass: "from-[#d78c4c]/28 via-[#ffd0a7]/14 to-transparent",
+    glowClass: "bg-[#d28a49]",
+  },
+  {
+    id: "opposans",
+    name: "OPPOSans",
+    tag: "科技几何",
+    vibe: "利落、克制、锐",
+    description:
+      "这套更偏工业设计感，边缘利落，适合高分屏和极简桌面，整体会显得更冷一点。",
+    recommendedFor: "适合高 DPI 屏和偏硬朗的视觉偏好。",
+    chinesePreview: "让界面像被重新磨过一遍，干净又有张力",
+    englishPreview: "Crisp geometry for a sharper and more technical interface.",
+    previewFont: "\"OPPOSans\", \"HarmonyOS Sans UI\", sans-serif",
+    accentClass: "from-[#5661ff]/26 via-[#99a4ff]/12 to-transparent",
+    glowClass: "bg-[#5b67ff]",
+  },
+  {
+    id: "inter-harmonyos",
+    name: "Inter + HarmonyOS",
+    tag: "UI 极致",
+    vibe: "英数极净、中文稳住",
+    description:
+      "英文字母和数字走更像设计工具的 Inter，中文回退到 HarmonyOS，整体排版会更像一套精修过的 UI。",
+    recommendedFor: "适合强迫症和界面细节爱好者。",
+    chinesePreview: "把中文的稳和英文的利索，拼成一套新质感",
+    englishPreview: "Inter for Latin, HarmonyOS for CJK, with a calmer macOS-like rhythm.",
+    previewFont: "\"Inter\", \"HarmonyOS Sans UI\", sans-serif",
+    accentClass: "from-[#2b7fff]/26 via-[#7ac6ff]/10 to-transparent",
+    glowClass: "bg-[#317bff]",
+  },
+];
