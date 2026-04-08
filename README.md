@@ -1,175 +1,99 @@
-# Windows全局字体替换器
+# WindowsFontTuner 2.0
 
-> 如果你也受够了微软那套又细、又灰、又发虚，看久了像在拿眼睛上刑的默认字体，这个工具就是给你准备的。  
-> 一键换字体，一键备份，一键恢复，尽量少折腾系统，尽量多提升观感。
+把 Windows 字体这件事，从“注册表体操”做成一个真正能用、能回退、能长期放在桌面的工具。
 
-`Windows全局字体替换器` 是一个给普通用户准备的 Windows 字体调校工具。  
-它的目标很直接：把系统字体从“能用”拉到“顺眼”，而且别把电脑搞炸。
+`WindowsFontTuner 2.0` 现在是一套重新做过的 `Rust + Tauri 2 + React` 桌面应用：
 
-## ✨ 这玩意能干嘛
+- 更像一个极简的视觉调音台，不像一堆危险开关
+- 界面无边框、圆角、云母材质，默认就是沉浸式窗口
+- 选风格、点应用，剩下的提权、备份、写注册表、广播刷新都交给底层
+- 保留“后悔药”，也保留“出事时还能盲救”的安全感
+- 默认同时提供安装版和绿色便携版，适合“装上就用”也适合“用完即走”
 
-- 一键替换 `Segoe UI` / `Segoe UI Variable` 相关系统字体映射
-- 一键调整桌面图标、菜单、传统窗口字体
-- 一键应用更舒服的文字渲染参数
-- 自动备份 `FontSubstitutes`、`Desktop`、`Avalon.Graphics`、`WindowMetrics`
-- 一键恢复最近一次备份，翻车了也能撤回
-- 一键恢复 `Windows 默认` 字体映射和渲染参数
-- 一键启动 `DISM + SFC` 官方修复流程，处理系统字体文件缺失
-- 内置字体包，不用再自己满网找字体
-- 支持检查更新，后续发新版本软件里能直接提示
+## 现在这版能做什么
 
-## 📦 现在有两种下载方式
+- 一键应用预设字体风格
+- 启动时自动识别当前系统正在使用的风格
+- 按屏幕分辨率和 DPI 缩放下发不同渲染矩阵
+- 自动备份 `FontSubstitutes`、`FontLink`、`Desktop`、`Avalon.Graphics`
+- 一键恢复 Windows 原生设定
+- 一键拉起 `DISM /RestoreHealth` 和 `sfc /scannow`
+- 支持自定义导入字体文件
+- 支持自动下载并安装可公开分发的字体资源
+- 自动补上 `Segoe UI Emoji` 和 `Microsoft YaHei` 的 FontLink 回退链，降低 Emoji / 生僻字翻车概率
 
-- `Setup.exe` 安装版：适合小白，双击安装，自动创建桌面和开始菜单快捷方式
-- `zip` 便携版：适合喜欢自己解压、自己掌控目录的人
-
-## 🔤 内置三套字体方案
+## 当前预设
 
 - `HarmonyOS Sans SC`
-  风格现代、干净，整体观感最接近这台机器现在调好的效果。
+  现代、干净、最稳妥的长期默认方案
 
-- `Source Han Sans CN`
-  最稳、最中性，跨机器一致性最好，适合长期默认使用。
+- `更纱黑体`
+  笔画更扎实，适合代码、文档、资源管理器
 
-- `Sarasa UI SC`
-  笔画更扎实，更有存在感，适合嫌 Windows 默认太细的人。
+- `思源黑体 CN`
+  中性、克制、跨平台一致性最好
 
-## 🎯 适合谁
+- `霞鹜文楷`
+  更温润，更有书卷气，适合写作和阅读
 
-- 看不惯 Windows 默认字体那股“又细又虚”的味道
-- 想把桌面、资源管理器、传统界面整体调顺眼一点
-- 不想手动翻注册表，但又想保留可回退能力
-- 想直接给朋友或网友发一个能用的字体替换工具
+- `OPPOSans`
+  需要先导入字体文件，再一键应用
 
-## 🚀 怎么用
+- `Inter + HarmonyOS`
+  把英文字母和数字的节奏拉得更像设计工具，中文保持稳定
 
-1. 下载你想要的版本。
-2. 如果你下的是 `Setup.exe`，直接双击安装。
-3. 如果你下的是 `zip`，解压后右键运行 `WindowsFontTuner.exe`，选择“以管理员身份运行”。
-4. 在下拉框里选一个预设。
-5. 点击“安装所需字体”。
-6. 点击“应用当前预设”。
-7. 如果效果不满意，点击“恢复最近备份”。
-8. 如果想回到微软原生方案，点击“恢复 Windows 默认”。
-9. 如果系统自带字体文件被误删，再点“修复系统字体”。
+## 安全感设计
 
-## 🧠 软件里实际做了什么
+- 每次真正写入前都会静默备份
+- UI 右下角藏了一个很低调的急救箱菜单
+- 支持“恢复 Windows 原生设定”
+- 支持“修复系统字体文件”
+- 支持隐藏的 `Shift` 急救模式
 
-- 从 `Presets` 目录读取多个字体预设
-- 从 `FontPackages` 目录读取内置字体包
-- 检查当前预设所需字体是否已经安装
-- 自动安装当前预设所需字体
-- 自动导出一份注册表备份到 `%LOCALAPPDATA%\\WindowsFontTuner\\Backups`
-- 写入字体替换、渲染参数和窗口字体设置
-- 支持清除本工具写入过的字体映射，恢复 Windows 默认状态
-- 支持调用微软官方的 `DISM /RestoreHealth` 和 `sfc /scannow`
-- 重建字体缓存并按需重启资源管理器
+### Shift 急救模式
 
-## ⚠️ 先把边界说清楚
+如果你真的把系统字体搞到看不清了：
 
-- Windows 11 的字体显示不是一条线说了算，不同区域响应程度可能不一样
-- 这个工具不保证系统里每一个角落都会 100% 跟着同一套字体走
-- 它不会自动卸载已经安装到系统里的字体文件
-- 它不会去改 Explorer 的私有资源，也不会碰 WinUI / XAML 私有样式
-- 公开 Release 不会附带 `Segoe UI`、`Segoe UI Variable` 这类 Windows 自带字体文件
+1. 按住 `Shift`
+2. 再双击启动 `WindowsFontTuner 2.0`
 
-为什么不把微软默认字体一起打包？
+程序会跳过界面，直接在后台静默恢复它写过的字体映射，并尝试刷新资源管理器。
 
-- 微软官方字体 FAQ 明确写了：除文档嵌入等特殊情况外，`Windows 自带字体不能被重新分发`
-- `Segoe UI` 这类字体在官方列表里也标的是 `Download N/A`，只随微软产品提供
-- 所以这个项目里“恢复默认”的做法是：恢复注册表和渲染参数；如果系统字体文件本身坏了或被删了，再调用 Windows 官方修复
+## 技术栈
 
-## ❓为什么没有 MiSans
+- `Rust`
+- `Tauri 2`
+- `React`
+- `TypeScript`
+- `framer-motion`
 
-不是我不想放，是它的授权不适合直接塞进公开 Release。
+## 目录说明
 
-简单说就是：
+- [WindowsFontTuner2](./WindowsFontTuner2)
+  当前主线项目，2.0 Tauri 版
 
-- `MiSans` 官方授权明确限制再次分发字体软件或其副本
-- 所以它不适合被直接打进一个公开下载的工具里
-- 现在内置的三套字体，都是更适合公开分发的方案
+- 根目录里的 `C# / WinForms` 文件
+  旧版实现，保留作历史参考，不再作为主线 UI 继续迭代
 
-## 📝 字体授权与来源
-
-软件附带字体包时，都会一起带上原始授权文件和来源说明：
-
-- `FontPackages\\harmonyos-sc\\LICENSE.txt`
-- `FontPackages\\source-han-sans-cn\\LICENSE.txt`
-- `FontPackages\\sarasa-ui-sc\\LICENSE.txt`
-
-对应来源：
-
-- [HarmonyOS Sans 官方仓库](https://github.com/huawei-fonts/HarmonyOS-Sans)
-- [Source Han Sans 官方仓库](https://github.com/adobe-fonts/source-han-sans)
-- [Sarasa Gothic 官方仓库](https://github.com/be5invis/Sarasa-Gothic)
-- [Microsoft Font redistribution FAQ](https://learn.microsoft.com/en-my/typography/fonts/font-faq)
-- [Segoe UI font family](https://learn.microsoft.com/en-us/typography/font-list/segoe-ui)
-
-## 🛠️ 自己构建
-
-项目目标框架是 `.NET Framework 4.8`，使用 Windows 自带环境里的 `MSBuild`。
-
-普通构建：
-
-```bat
-build.bat
-```
-
-生成位置：
-
-```text
-bin\Release\WindowsFontTuner.exe
-```
-
-如果你想一次性打出 `zip` 便携包和 `Setup.exe` 安装包：
+## 本地开发
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\Build-Packages.ps1 -Version 0.5.2
+cd .\WindowsFontTuner2
+cmd /c npm install
+cmd /c npm run tauri dev
 ```
 
-## 🧩 自定义预设
-
-预设就是 `Presets` 目录里的 JSON 文件。
-
-主要字段说明：
-
-- `Name`：界面里显示的预设名
-- `Description`：预设说明
-- `FontPackageId`：当前预设对应的内置字体包 ID
-- `RequiredFonts`：这个预设依赖的已安装字体
-- `FontSubstitutes`：写入 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes` 的字体替换项
-- `DesktopTextSettings`：写入 `HKCU\Control Panel\Desktop` 的字体平滑设置
-- `Rendering`：写入 `HKCU\Software\Microsoft\Avalon.Graphics\DISPLAY*` 的渲染参数
-- `WindowMetrics`：通过 `SystemParametersInfo` 应用的窗口、菜单、图标字体参数
-
-## 🚢 发布到 GitHub
-
-这个目录已经可以直接当作 Git 仓库使用。
-
-如果你已经有一个空仓库：
-
-```bat
-git remote add origin https://github.com/<your-name>/WindowsFontTuner.git
-git push -u origin main
-```
-
-如果你已经配置好了 GitHub 凭据，可以直接用内置脚本更新 Release：
+## 构建发布
 
 ```powershell
-$assets = @(
-  '.\dist\WindowsFontTuner-v0.5.2-win64.zip',
-  '.\dist\WindowsFontTuner-Setup-v0.5.2.exe'
-)
-
-powershell -ExecutionPolicy Bypass -File .\scripts\Publish-Release.ps1 `
-  -Version 0.5.2 `
-  -ReleaseName 'Windows全局字体替换器 v0.5.2' `
-  -AssetPaths $assets
+cd .\WindowsFontTuner2
+cmd /c npm run tauri build
 ```
 
-## 🪄 最后一句
+默认会产出 `NSIS` 安装包。  
+便携 `zip` 也会保留，因为这个项目本身就强调“绿色、用完即走”。
 
-这个工具不是为了把 Windows 变成 macOS。  
-它只是很认真地解决一个很多人都在忍、但懒得自己折腾的问题：
+## 支持这个项目
 
-**让 Windows 字体，终于看起来像是给人看的。**
+这个工具如果真的让你的 Windows 看起来顺眼了，项目里也藏了一个很克制的支持入口。  
+不打扰，但永远欢迎一杯咖啡。

@@ -1,6 +1,23 @@
 * text=auto
 *.bat text eol=crlf
-*.cs text
-*.csproj text
+*.cs text linguist-vendored
+*.csproj text linguist-vendored
+*.pdb linguist-vendored
+*.dll linguist-vendored
+*.exe linguist-vendored
+*.nlp linguist-vendored
 *.json text
 *.md text
+/AppShellForm.cs linguist-vendored
+/FontPackage.cs linguist-vendored
+/FontPreset.cs linguist-vendored
+/FontTunerService.cs linguist-vendored
+/MainForm.cs linguist-vendored
+/ModernControls.cs linguist-vendored
+/Program.cs linguist-vendored
+/UpdateService.cs linguist-vendored
+/WindowsFontTuner.csproj linguist-vendored
+bin/** linguist-vendored
+obj/** linguist-vendored
+artifacts/** linguist-vendored
+dist/** linguist-vendored

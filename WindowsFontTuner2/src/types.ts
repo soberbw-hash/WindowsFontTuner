@@ -1,8 +1,10 @@
-export type PresetStatus = "ready" | "soon";
+export type PresetStatus = "ready";
+export type InstallMode = "autoDownload" | "manualImport";
 
 export interface RuntimePresetState {
   id: string;
   status: PresetStatus;
+  installMode: InstallMode;
   available: boolean;
   current: boolean;
 }
@@ -38,15 +40,16 @@ export interface PresetMeta {
   vibe: string;
   description: string;
   recommendedFor: string;
-  chinesePreview: string;
-  englishPreview: string;
+  heroLine: string;
+  englishLine: string;
+  noteLine: string;
   previewFont: string;
   accentClass: string;
-  glowClass: string;
 }
 
 export interface DisplayPreset extends PresetMeta {
   status: PresetStatus;
+  installMode: InstallMode;
   available: boolean;
   current: boolean;
 }

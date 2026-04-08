@@ -9,6 +9,10 @@ export async function applyPreset(presetId: string) {
   return invoke<ActionResult>("apply_preset", { presetId });
 }
 
+export async function importFontFiles(paths: string[]) {
+  return invoke<ActionResult>("import_font_files", { paths });
+}
+
 export async function restoreWindowsDefault() {
   return invoke<ActionResult>("restore_windows_default");
 }
