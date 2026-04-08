@@ -1,6 +1,6 @@
 [package]
 name = "windowsfonttuner2"
-version = "2.2.0"
+version = "2.2.1"
 description = "Windows visual tuner built with Rust and Tauri 2"
 authors = ["sober"]
 edition = "2021"

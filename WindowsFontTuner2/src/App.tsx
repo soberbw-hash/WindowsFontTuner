@@ -1,6 +1,6 @@
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -22,7 +22,7 @@ import {
   Wrench,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import supportQr from "./assets/support-qr.png";
 import { presetCatalog } from "./lib/presets";
@@ -30,7 +30,8 @@ import { applyPreset, importFontFiles, loadBootstrap, repairSystemFonts, restore
 import type { BootstrapPayload, DisplayPreset } from "./types";
 
 const CANVAS_WIDTH = 1440;
-const CANVAS_HEIGHT = 800;
+const CANVAS_HEIGHT = 760;
+const SYSTEM_PREVIEW_FONT = '"Segoe UI Variable", "Microsoft YaHei UI", sans-serif';
 
 type ToastTone = "success" | "warning" | "info";
 
@@ -48,7 +49,9 @@ function App() {
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportNudge, setSupportNudge] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
+  const [isSliding, setIsSliding] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
+  const slideTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     void refresh();
@@ -57,7 +60,7 @@ function App() {
   useEffect(() => {
     const updateScale = () => {
       const availableWidth = window.innerWidth - 48;
-      const availableHeight = window.innerHeight - 64 - 40;
+      const availableHeight = window.innerHeight - 56 - 36;
       const next = Math.min(availableWidth / CANVAS_WIDTH, availableHeight / CANVAS_HEIGHT, 1);
       setCanvasScale(next);
     };
@@ -65,6 +68,14 @@ function App() {
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (slideTimerRef.current) {
+        window.clearTimeout(slideTimerRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -94,8 +105,9 @@ function App() {
   const canGoPrev = currentIndex > 0;
   const canGoNext = currentIndex < presets.length - 1;
   const canApply = !!currentPreset && !currentPreset.current && !!bootstrap?.isAdmin && !isBusy;
-  const longName = currentPreset.name.length >= 17;
-  const longHero = currentPreset.heroLine.length >= 13;
+  const canSlide = !isSliding && !isBusy;
+  const longName = currentPreset.name.length >= 15;
+  const compactSummary = currentPreset.heroLine.length >= 12;
 
   const canvasStyle = {
     width: `${CANVAS_WIDTH}px`,
@@ -222,12 +234,22 @@ function App() {
   }
 
   function shiftPreset(nextIndex: number) {
-    if (nextIndex < 0 || nextIndex >= presets.length || nextIndex === currentIndex) {
+    if (nextIndex < 0 || nextIndex >= presets.length || nextIndex === currentIndex || !canSlide) {
       return;
     }
 
     setDirection(nextIndex > currentIndex ? 1 : -1);
     setCurrentIndex(nextIndex);
+    setIsSliding(true);
+
+    if (slideTimerRef.current) {
+      window.clearTimeout(slideTimerRef.current);
+    }
+
+    slideTimerRef.current = window.setTimeout(() => {
+      setIsSliding(false);
+      slideTimerRef.current = null;
+    }, 320);
   }
 
   return (
@@ -277,64 +299,84 @@ function App() {
                 当前正在看的风格
               </div>
 
-              <button className="gallery-arrow gallery-arrow--left" disabled={!canGoPrev} onClick={() => shiftPreset(currentIndex - 1)} type="button">
+              <button
+                className="gallery-arrow gallery-arrow--left"
+                disabled={!canGoPrev || !canSlide}
+                onClick={() => shiftPreset(currentIndex - 1)}
+                type="button"
+              >
                 <ArrowLeft size={18} />
               </button>
 
-              <button className="gallery-arrow gallery-arrow--right" disabled={!canGoNext} onClick={() => shiftPreset(currentIndex + 1)} type="button">
+              <button
+                className="gallery-arrow gallery-arrow--right"
+                disabled={!canGoNext || !canSlide}
+                onClick={() => shiftPreset(currentIndex + 1)}
+                type="button"
+              >
                 <ArrowRight size={18} />
               </button>
 
               <div className="gallery-card-shell">
-                <AnimatePresence initial={false} custom={direction}>
+                <AnimatePresence custom={direction} initial={false} mode="wait">
                   <motion.article
                     key={currentPreset.id}
-                    custom={direction}
-                    variants={cardVariants}
-                    initial="enter"
                     animate="center"
-                    exit="exit"
-                    transition={cardTransition}
                     className="gallery-card"
+                    custom={direction}
+                    exit="exit"
+                    initial="enter"
+                    transition={cardTransition}
+                    variants={cardVariants}
                   >
                     <div className={`gallery-card__top bg-gradient-to-br ${currentPreset.accentClass}`}>
                       <div className="gallery-card__chips">
                         <span className="gallery-card__chip gallery-card__chip--main">{currentPreset.tag}</span>
                         <span className="gallery-card__chip">{currentPreset.vibe}</span>
                         {currentPreset.installMode === "manualImport" ? (
-                          <span className="gallery-card__chip gallery-card__chip--accent">需导入</span>
+                          <span className="gallery-card__chip gallery-card__chip--accent">先导入</span>
                         ) : null}
                       </div>
-                      <h2
-                        className={`gallery-card__font-name ${longName ? "gallery-card__font-name--compact" : ""}`}
-                        style={{ fontFamily: currentPreset.previewFont }}
-                      >
-                        {currentPreset.name}
-                      </h2>
+
+                      <div className="gallery-card__title-group">
+                        <h2
+                          className={`gallery-card__font-name ${longName ? "gallery-card__font-name--compact" : ""}`}
+                          style={{ fontFamily: currentPreset.previewFont }}
+                        >
+                          {currentPreset.name}
+                        </h2>
+                        <p className="gallery-card__topline">{currentPreset.noteLine}</p>
+                      </div>
                     </div>
 
                     <div className="gallery-card__bottom">
                       <div className="gallery-card__main">
-                        <p className="gallery-card__note">{currentPreset.noteLine}</p>
-                        <h3 className={`gallery-card__headline ${longHero ? "gallery-card__headline--compact" : ""}`}>
-                          {currentPreset.heroLine}
-                        </h3>
-                        <p className="gallery-card__detail">{currentPreset.description}</p>
-                        <p className="gallery-card__english">{currentPreset.englishLine}</p>
+                        <div className="gallery-card__preview-grid">
+                          <PreviewCard footer={bootstrap?.activeFontLabel ?? "Windows 默认"} label="当前系统" sampleFont={SYSTEM_PREVIEW_FONT} tone="muted" />
+                          <PreviewCard footer={currentPreset.name} label="应用后" sampleFont={currentPreset.previewFont} tone="primary" />
+                        </div>
+
+                        <div className="gallery-card__summary">
+                          <h3 className={`gallery-card__summary-title ${compactSummary ? "gallery-card__summary-title--compact" : ""}`}>
+                            {currentPreset.heroLine}
+                          </h3>
+                          <p className="gallery-card__summary-text">{currentPreset.description}</p>
+                          <p className="gallery-card__summary-english">{currentPreset.englishLine}</p>
+                        </div>
                       </div>
 
                       <aside className="gallery-card__status">
                         <div className="space-y-3">
                           <div className="text-[12px] font-semibold uppercase tracking-[0.24em] text-[var(--app-muted)]">当前状态</div>
-                          <div className="text-[28px] font-semibold tracking-[-0.055em] text-slate-950">{resolveStatusTitle(currentPreset)}</div>
-                          <p className="text-[15px] leading-7 text-[var(--app-muted)]">{currentPreset.recommendedFor}</p>
+                          <div className="text-[26px] font-semibold tracking-[-0.05em] text-slate-950">{resolveStatusTitle(currentPreset)}</div>
+                          <p className="text-[14px] leading-7 text-[var(--app-muted)]">{currentPreset.recommendedFor}</p>
                         </div>
 
                         <div className="space-y-2">
-                          <MetaRow label="当前识别到的系统风格" value={bootstrap?.activeFontLabel ?? "Windows 默认"} />
+                          <MetaRow label="当前系统风格" value={bootstrap?.activeFontLabel ?? "Windows 默认"} />
                           <MetaRow label="屏幕匹配矩阵" value={bootstrap?.display.matrixProfile ?? "正在识别"} />
                           <MetaRow
-                            label="备份位置"
+                            label="备份状态"
                             value={bootstrap?.backupCount ? `${bootstrap.backupCount} 份快照已就位` : "还没写入任何修改"}
                           />
                         </div>
@@ -347,7 +389,7 @@ function App() {
 
                           <div className="gallery-card__secondary">
                             <SoftButton icon={<FolderUp size={16} />} onClick={handleImport}>
-                              自定义导入
+                              导入本地字体
                             </SoftButton>
                             <SoftButton
                               icon={<ExternalLink size={16} />}
@@ -367,7 +409,9 @@ function App() {
                 {presets.map((preset, index) => (
                   <button
                     key={preset.id}
+                    aria-label={`切换到 ${preset.name}`}
                     className={`gallery-pagination__dot ${index === currentIndex ? "is-active" : ""}`}
+                    disabled={!canSlide}
                     onClick={() => shiftPreset(index)}
                     type="button"
                   />
@@ -383,11 +427,11 @@ function App() {
           <AnimatePresence>
             {rescueOpen ? (
               <motion.div
-                initial={{ opacity: 0, y: 14, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 12, scale: 0.96 }}
-                transition={{ duration: 0.18 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
                 className="rescue-panel"
+                exit={{ opacity: 0, scale: 0.96, y: 12 }}
+                initial={{ opacity: 0, scale: 0.96, y: 14 }}
+                transition={{ duration: 0.18 }}
               >
                 <RescueButton icon={<RotateCcw size={16} />} label="恢复 Windows 原生设定" onClick={handleRestoreDefaults} />
                 <RescueButton icon={<Wrench size={16} />} label="修复系统字体文件" onClick={handleRepairFonts} />
@@ -413,11 +457,11 @@ function App() {
       <AnimatePresence>
         {toast ? (
           <motion.div
-            initial={{ opacity: 0, y: -18, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.98 }}
-            transition={{ duration: 0.18 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             className="toast-stack"
+            exit={{ opacity: 0, scale: 0.98, y: -12 }}
+            initial={{ opacity: 0, scale: 0.98, y: -18 }}
+            transition={{ duration: 0.18 }}
           >
             <div className={`app-toast app-toast--${toast.tone}`}>
               <div>{toast.message}</div>
@@ -426,12 +470,12 @@ function App() {
             <AnimatePresence>
               {supportNudge ? (
                 <motion.button
-                  initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.18 }}
                   className="support-nudge"
+                  exit={{ opacity: 0, y: -8 }}
+                  initial={{ opacity: 0, y: -8 }}
                   onClick={() => setSupportOpen(true)}
+                  transition={{ duration: 0.18 }}
                   type="button"
                 >
                   <Coffee size={16} />
@@ -446,20 +490,20 @@ function App() {
       <AnimatePresence>
         {supportOpen ? (
           <motion.div
-            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
             className="support-modal-backdrop"
+            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
             onClick={() => setSupportOpen(false)}
+            transition={{ duration: 0.18 }}
           >
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.96 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               className="support-modal"
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              initial={{ opacity: 0, scale: 0.96, y: 20 }}
               onClick={(event) => event.stopPropagation()}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--app-muted)]">
                 <Coffee size={15} className="text-[var(--app-blue)]" />
@@ -483,8 +527,8 @@ function App() {
 const cardVariants = {
   enter: (direction: number) => ({
     opacity: 0,
-    x: direction > 0 ? 92 : -92,
-    scale: 0.985,
+    x: direction > 0 ? 56 : -56,
+    scale: 0.992,
   }),
   center: {
     opacity: 1,
@@ -493,17 +537,34 @@ const cardVariants = {
   },
   exit: (direction: number) => ({
     opacity: 0,
-    x: direction > 0 ? -92 : 92,
-    scale: 0.985,
+    x: direction > 0 ? -56 : 56,
+    scale: 0.992,
   }),
 };
 
 const cardTransition = {
-  type: "spring",
-  stiffness: 280,
-  damping: 28,
-  mass: 0.78,
+  duration: 0.28,
+  ease: [0.22, 1, 0.36, 1],
 } as const;
+
+function PreviewCard(props: {
+  label: string;
+  sampleFont: string;
+  footer: string;
+  tone: "muted" | "primary";
+}) {
+  return (
+    <div className={`preview-card preview-card--${props.tone}`}>
+      <div className="preview-card__label">{props.label}</div>
+      <div className="preview-card__sample" style={{ fontFamily: props.sampleFont }}>
+        <div className="preview-card__headline">敏捷的棕色狐狸</div>
+        <div className="preview-card__digits">Aa 0123456789</div>
+        <div className="preview-card__english">The quick brown fox jumps over the lazy dog.</div>
+      </div>
+      <div className="preview-card__footer">{props.footer}</div>
+    </div>
+  );
+}
 
 function WindowButton(props: {
   icon: ReactNode;
@@ -511,11 +572,7 @@ function WindowButton(props: {
   onClick: () => Promise<void> | void;
 }) {
   return (
-    <button
-      className={`window-button ${props.danger ? "window-button--danger" : ""}`}
-      onClick={props.onClick}
-      type="button"
-    >
+    <button className={`window-button ${props.danger ? "window-button--danger" : ""}`} onClick={props.onClick} type="button">
       {props.icon}
     </button>
   );
@@ -567,14 +624,14 @@ function resolveStatusTitle(preset: DisplayPreset) {
   }
 
   if (preset.available) {
-    return "可以直接上";
+    return "可以直接应用";
   }
 
   if (preset.installMode === "manualImport") {
     return "先导入字体";
   }
 
-  return "点一下就装好";
+  return "一键自动装好";
 }
 
 function resolveApplyLabel(preset: DisplayPreset, isAdmin: boolean) {
