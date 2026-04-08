@@ -1,6 +1,6 @@
 use crate::models::{
-    DesktopTextSettings, FontDownload, InstallMode, PresetDefinition, PresetStatus,
-    RenderingSettings,
+    DesktopTextSettings, FontDownload, InstallMode, PresetDefinition, PresetStatus, RenderingSettings,
+    RiskLevel,
 };
 
 const DESKTOP_SETTINGS: DesktopTextSettings = DesktopTextSettings {
@@ -227,6 +227,7 @@ pub fn preset_definitions() -> Vec<PresetDefinition> {
             font_substitutes: HARMONY_SUBSTITUTES,
             desktop: DESKTOP_SETTINGS,
             rendering: RENDERING_SETTINGS,
+            risk_level: RiskLevel::Low,
         },
         PresetDefinition {
             id: "sarasa-ui-sc",
@@ -239,6 +240,7 @@ pub fn preset_definitions() -> Vec<PresetDefinition> {
             font_substitutes: SARASA_SUBSTITUTES,
             desktop: DESKTOP_SETTINGS,
             rendering: RENDERING_SETTINGS,
+            risk_level: RiskLevel::Medium,
         },
         PresetDefinition {
             id: "source-han-sans-cn",
@@ -251,6 +253,7 @@ pub fn preset_definitions() -> Vec<PresetDefinition> {
             font_substitutes: SOURCE_HAN_SUBSTITUTES,
             desktop: DESKTOP_SETTINGS,
             rendering: RENDERING_SETTINGS,
+            risk_level: RiskLevel::Low,
         },
         PresetDefinition {
             id: "lxgw-wenkai",
@@ -263,6 +266,7 @@ pub fn preset_definitions() -> Vec<PresetDefinition> {
             font_substitutes: LXGW_SUBSTITUTES,
             desktop: DESKTOP_SETTINGS,
             rendering: RENDERING_SETTINGS,
+            risk_level: RiskLevel::Medium,
         },
         PresetDefinition {
             id: "opposans",
@@ -275,6 +279,7 @@ pub fn preset_definitions() -> Vec<PresetDefinition> {
             font_substitutes: OPPOSANS_SUBSTITUTES,
             desktop: DESKTOP_SETTINGS,
             rendering: RENDERING_SETTINGS,
+            risk_level: RiskLevel::High,
         },
         PresetDefinition {
             id: "inter-harmonyos",
@@ -287,6 +292,7 @@ pub fn preset_definitions() -> Vec<PresetDefinition> {
             font_substitutes: INTER_HARMONY_SUBSTITUTES,
             desktop: DESKTOP_SETTINGS,
             rendering: RENDERING_SETTINGS,
+            risk_level: RiskLevel::Low,
         },
     ]
 }

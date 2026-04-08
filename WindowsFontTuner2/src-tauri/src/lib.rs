@@ -2,7 +2,7 @@ mod models;
 mod preset_data;
 mod system;
 
-use models::{ActionResult, BootstrapPayload};
+use models::{ActionResult, ApplySummary, BootstrapPayload, ImportedPresetPayload, RenderStyleId};
 use tauri::Manager;
 #[cfg(target_os = "windows")]
 use window_vibrancy::apply_mica;
@@ -16,13 +16,27 @@ async fn load_bootstrap() -> Result<BootstrapPayload, String> {
 }
 
 #[tauri::command]
-async fn apply_preset(preset_id: String) -> Result<ActionResult, String> {
+async fn get_apply_summary(preset_id: String, render_style_id: String) -> Result<ApplySummary, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        system::apply_preset(&preset_id, &preset_data::preset_definitions())
+        let render_style_id = RenderStyleId::from_str(&render_style_id)
+            .ok_or_else(|| "不认识这个渲染风格。".to_string())?;
+        system::build_apply_summary(&preset_id, render_style_id, &preset_data::preset_definitions())
+            .map_err(|error| error.to_string())
     })
     .await
     .map_err(|error| error.to_string())?
-    .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+async fn apply_preset(preset_id: String, render_style_id: String) -> Result<ActionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let render_style_id = RenderStyleId::from_str(&render_style_id)
+            .ok_or_else(|| "不认识这个渲染风格。".to_string())?;
+        system::apply_preset(&preset_id, render_style_id, &preset_data::preset_definitions())
+            .map_err(|error| error.to_string())
+    })
+    .await
+    .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]
@@ -41,6 +55,36 @@ async fn restore_windows_default() -> Result<ActionResult, String> {
     .await
     .map_err(|error| error.to_string())?
     .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+async fn run_recovery_action(action: String) -> Result<ActionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        system::run_recovery_action(&action, &preset_data::preset_definitions())
+            .map_err(|error| error.to_string())
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn export_current_scheme(preset_id: String, render_style_id: String) -> Result<ActionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let render_style_id = RenderStyleId::from_str(&render_style_id)
+            .ok_or_else(|| "不认识这个渲染风格。".to_string())?;
+        system::export_current_scheme(&preset_id, render_style_id, &preset_data::preset_definitions())
+            .map_err(|error| error.to_string())
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn import_shared_scheme(path: String) -> Result<ImportedPresetPayload, String> {
+    tauri::async_runtime::spawn_blocking(move || system::import_shared_scheme(&path))
+        .await
+        .map_err(|error| error.to_string())?
+        .map_err(|error| error.to_string())
 }
 
 #[tauri::command]
@@ -71,9 +115,13 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             load_bootstrap,
+            get_apply_summary,
             apply_preset,
             import_font_files,
             restore_windows_default,
+            run_recovery_action,
+            export_current_scheme,
+            import_shared_scheme,
             repair_system_fonts
         ])
         .run(tauri::generate_context!())
