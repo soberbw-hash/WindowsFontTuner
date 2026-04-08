@@ -211,28 +211,28 @@ button {
 .app-canvas {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   transform-origin: center center;
   will-change: transform;
 }
 
 .app-hero {
   display: flex;
-  min-height: 144px;
+  min-height: 118px;
   flex-direction: column;
   justify-content: center;
-  gap: 10px;
+  gap: 7px;
   border: 1px solid var(--app-line);
   border-radius: 34px;
   background: var(--app-surface-soft);
-  padding: 22px 28px;
-  box-shadow: 0 18px 52px rgba(88, 110, 154, 0.1);
+  padding: 16px 22px;
+  box-shadow: 0 16px 42px rgba(88, 110, 154, 0.09);
   backdrop-filter: blur(20px);
 }
 
 .app-hero__title {
   white-space: nowrap;
-  font-size: clamp(28px, 2.6vw, 42px);
+  font-size: clamp(25px, 2.2vw, 36px);
   line-height: 1.08;
   letter-spacing: -0.06em;
   font-weight: 700;
@@ -242,8 +242,8 @@ button {
 .app-hero__copy {
   max-width: 860px;
   margin: 0;
-  font-size: 12px;
-  line-height: 1.65;
+  font-size: 10.5px;
+  line-height: 1.5;
   color: var(--app-muted);
 }
 
@@ -314,7 +314,7 @@ button {
 .gallery-shell__flag {
   position: absolute;
   left: 50%;
-  top: 18px;
+  top: 14px;
   z-index: 4;
   display: inline-flex;
   transform: translateX(-50%);
@@ -323,15 +323,15 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.56);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.78);
-  padding: 7px 13px;
-  font-size: 12px;
+  padding: 6px 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--app-muted);
 }
 
 .gallery-card-shell {
   position: absolute;
-  inset: 58px 78px 58px;
+  inset: 50px 68px 56px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -342,7 +342,7 @@ button {
 .gallery-card {
   display: flex;
   width: 100%;
-  max-width: 1000px;
+  max-width: 960px;
   max-height: 100%;
   min-height: 0;
   flex-direction: column;
@@ -358,10 +358,10 @@ button {
 
 .gallery-card__top {
   display: flex;
-  min-height: 124px;
+  min-height: 102px;
   flex-direction: column;
-  gap: 10px;
-  padding: 16px 22px 14px;
+  gap: 6px;
+  padding: 12px 18px 10px;
   background-image:
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
     linear-gradient(135deg, transparent 0%, transparent 70%);
@@ -378,8 +378,8 @@ button {
   align-items: center;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.56);
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 5px 10px;
+  font-size: 11px;
   font-weight: 700;
   color: #45556f;
 }
@@ -398,13 +398,13 @@ button {
   display: flex;
   min-height: 0;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .gallery-card__font-name {
   margin: 0;
   white-space: nowrap;
-  font-size: clamp(28px, 2.9vw, 50px);
+  font-size: clamp(24px, 2.45vw, 40px);
   line-height: 1.02;
   letter-spacing: -0.055em;
   font-weight: 600;
@@ -412,14 +412,14 @@ button {
 }
 
 .gallery-card__font-name--compact {
-  font-size: clamp(24px, 2.4vw, 42px);
+  font-size: clamp(20px, 2.05vw, 36px);
 }
 
 .gallery-card__topline {
   max-width: 560px;
   margin: 0;
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 10.5px;
+  line-height: 1.45;
   color: #4d5e79;
 }
 
@@ -427,9 +427,9 @@ button {
   display: grid;
   flex: 1;
   min-height: 0;
-  grid-template-columns: minmax(0, 1fr) 292px;
-  gap: 16px;
-  padding: 16px 22px 18px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 12px;
+  padding: 12px 18px;
 }
 
 .gallery-card__main {
@@ -437,25 +437,25 @@ button {
   min-height: 0;
   min-width: 0;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .gallery-card__preview-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .preview-card {
   display: flex;
-  min-height: 146px;
+  min-height: 118px;
   min-width: 0;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   border: 1px solid rgba(215, 225, 242, 0.92);
-  border-radius: 24px;
+  border-radius: 22px;
   background: rgba(255, 255, 255, 0.9);
-  padding: 13px 15px;
+  padding: 10px 12px;
 }
 
 .preview-card--primary {
@@ -464,7 +464,7 @@ button {
 }
 
 .preview-card__label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: #42536f;
@@ -475,14 +475,14 @@ button {
   min-height: 0;
   flex: 1;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .preview-card__headline {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 26px;
+  font-size: 22px;
   line-height: 1.15;
   letter-spacing: -0.055em;
   font-weight: 600;
@@ -493,8 +493,8 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: 12px;
+  line-height: 1.35;
   color: #243248;
 }
 
@@ -502,13 +502,13 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 10.5px;
+  line-height: 1.4;
   color: #55627b;
 }
 
 .preview-card__footer {
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 600;
   color: #62728d;
 }
@@ -516,7 +516,7 @@ button {
 .gallery-card__summary {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .gallery-card__summary-title {
@@ -524,7 +524,7 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 26px;
+  font-size: 22px;
   line-height: 1.12;
   letter-spacing: -0.06em;
   font-weight: 700;
@@ -532,21 +532,21 @@ button {
 }
 
 .gallery-card__summary-title--compact {
-  font-size: 22px;
+  font-size: 18px;
 }
 
 .gallery-card__summary-text {
   max-width: 560px;
   margin: 0;
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 10.5px;
+  line-height: 1.45;
   color: #4f607b;
 }
 
 .gallery-card__summary-english {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 11px;
+  line-height: 1.45;
   color: #50607d;
 }
 
@@ -555,25 +555,25 @@ button {
   min-height: 0;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 16px;
+  gap: 10px;
   border: 1px solid rgba(255, 255, 255, 0.56);
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.82);
-  padding: 18px;
+  padding: 14px;
 }
 
 .meta-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  font-size: 13px;
-  line-height: 1.55;
+  gap: 10px;
+  font-size: 11px;
+  line-height: 1.35;
   color: #55627b;
 }
 
 .meta-row span:last-child {
-  max-width: 144px;
+  max-width: 136px;
   text-align: right;
   font-weight: 600;
   color: #31415e;
@@ -583,12 +583,12 @@ button {
   display: flex;
   margin-top: auto;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 
 .gallery-card__apply {
   display: inline-flex;
-  height: 48px;
+  height: 42px;
   width: 100%;
   align-items: center;
   justify-content: center;
@@ -597,9 +597,9 @@ button {
   border-radius: 999px;
   background: linear-gradient(135deg, #2f6df6 0%, #5c8eff 100%);
   color: white;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
-  box-shadow: 0 14px 30px rgba(47, 109, 246, 0.24);
+  box-shadow: 0 12px 24px rgba(47, 109, 246, 0.22);
 }
 
 .gallery-card__apply:hover:not(:disabled) {
@@ -617,20 +617,20 @@ button {
 .gallery-card__secondary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 5px;
 }
 
 .soft-button {
   display: inline-flex;
-  height: 40px;
+  height: 32px;
   align-items: center;
   justify-content: center;
   gap: 8px;
   border: 1px solid rgba(220, 229, 245, 0.9);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.94);
-  padding: 0 16px;
-  font-size: 13px;
+  padding: 0 10px;
+  font-size: 11px;
   font-weight: 600;
   color: #334155;
 }
@@ -675,7 +675,7 @@ button {
 
 .gallery-pagination {
   position: absolute;
-  bottom: 22px;
+  bottom: 16px;
   left: 50%;
   z-index: 5;
   display: flex;

@@ -31,7 +31,7 @@ import { applyPreset, importFontFiles, loadBootstrap, repairSystemFonts, restore
 import type { BootstrapPayload, DisplayPreset } from "./types";
 
 const CANVAS_WIDTH = 1440;
-const CANVAS_HEIGHT = 760;
+const CANVAS_HEIGHT = 784;
 const SYSTEM_PREVIEW_FONT = '"Segoe UI Variable", "Microsoft YaHei UI", sans-serif';
 
 type ToastTone = "success" | "warning" | "info";
@@ -53,22 +53,53 @@ function App() {
   const [isSliding, setIsSliding] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const slideTimerRef = useRef<number | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     void refresh();
   }, []);
 
   useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) {
+      return;
+    }
+
+    let frameId: number | null = null;
     const updateScale = () => {
-      const availableWidth = window.innerWidth - 48;
-      const availableHeight = window.innerHeight - 56 - 36;
+      const availableWidth = Math.max(stage.clientWidth - 4, 1);
+      const availableHeight = Math.max(stage.clientHeight - 4, 1);
       const next = Math.min(availableWidth / CANVAS_WIDTH, availableHeight / CANVAS_HEIGHT, 1);
       setCanvasScale(next);
     };
 
-    updateScale();
-    window.addEventListener("resize", updateScale);
-    return () => window.removeEventListener("resize", updateScale);
+    const scheduleScale = () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null;
+        updateScale();
+      });
+    };
+
+    scheduleScale();
+
+    const observer = new ResizeObserver(() => {
+      scheduleScale();
+    });
+
+    observer.observe(stage);
+    window.addEventListener("resize", scheduleScale);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", scheduleScale);
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -276,8 +307,8 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden px-6 py-5">
-        <div className="app-canvas-stage">
+      <main className="flex-1 overflow-hidden px-6 py-4">
+        <div ref={stageRef} className="app-canvas-stage">
           <div className="app-canvas" style={canvasStyle}>
             <section className="app-hero">
               <div className="app-hero__title">把系统字体换成你真正想看的样子</div>
@@ -369,10 +400,10 @@ function App() {
                       </div>
 
                       <aside className="gallery-card__status">
-                        <div className="space-y-3">
+                        <div className="space-y-2.5">
                           <div className="text-[12px] font-semibold uppercase tracking-[0.24em] text-[var(--app-muted)]">当前状态</div>
-                          <div className="text-[26px] font-semibold tracking-[-0.05em] text-slate-950">{resolveStatusTitle(currentPreset)}</div>
-                          <p className="text-[14px] leading-7 text-[var(--app-muted)]">{currentPreset.recommendedFor}</p>
+                          <div className="text-[24px] font-semibold tracking-[-0.05em] text-slate-950">{resolveStatusTitle(currentPreset)}</div>
+                          <p className="text-[13px] leading-6 text-[var(--app-muted)]">{currentPreset.recommendedFor}</p>
                         </div>
 
                         <div className="space-y-2">
