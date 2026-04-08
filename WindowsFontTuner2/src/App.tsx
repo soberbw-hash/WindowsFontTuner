@@ -25,6 +25,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import supportQr from "./assets/support-qr.png";
+import appIcon from "./assets/app-icon.png";
 import { presetCatalog } from "./lib/presets";
 import { applyPreset, importFontFiles, loadBootstrap, repairSystemFonts, restoreWindowsDefault } from "./lib/tauri";
 import type { BootstrapPayload, DisplayPreset } from "./types";
@@ -256,7 +257,9 @@ function App() {
     <div className="relative z-10 flex h-full flex-col text-[var(--app-ink)]">
       <header data-tauri-drag-region className="app-titlebar">
         <div className="app-titlebar__identity">
-          <div className="app-logo">Aa</div>
+          <div className="app-logo">
+            <img alt="" className="app-logo__image" src={appIcon} />
+          </div>
           <div className="leading-tight">
             <div className="text-[15px] font-semibold tracking-tight">WindowsFontTuner 2.0</div>
             <div className="text-[11px] text-[var(--app-muted)]">Windows 视觉调音师</div>

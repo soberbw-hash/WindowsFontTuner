@@ -137,12 +137,16 @@ button {
   height: 38px;
   width: 38px;
   place-items: center;
+  overflow: hidden;
   border-radius: 18px;
-  background: linear-gradient(135deg, #2d6df7 0%, #82b9ff 100%);
-  color: white;
-  font-size: 18px;
-  font-weight: 700;
-  box-shadow: 0 12px 28px rgba(47, 109, 246, 0.22);
+  box-shadow: 0 10px 24px rgba(47, 109, 246, 0.18);
+}
+
+.app-logo__image {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
 }
 
 .app-link-pill,
@@ -327,7 +331,7 @@ button {
 
 .gallery-card-shell {
   position: absolute;
-  inset: 58px 78px 74px;
+  inset: 58px 78px 58px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,7 +343,7 @@ button {
   display: flex;
   width: 100%;
   max-width: 1000px;
-  height: 100%;
+  max-height: 100%;
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
@@ -354,10 +358,10 @@ button {
 
 .gallery-card__top {
   display: flex;
-  min-height: 136px;
+  min-height: 124px;
   flex-direction: column;
-  gap: 12px;
-  padding: 18px 22px 16px;
+  gap: 10px;
+  padding: 16px 22px 14px;
   background-image:
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
     linear-gradient(135deg, transparent 0%, transparent 70%);
@@ -414,8 +418,8 @@ button {
 .gallery-card__topline {
   max-width: 560px;
   margin: 0;
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 12px;
+  line-height: 1.6;
   color: #4d5e79;
 }
 
@@ -425,7 +429,7 @@ button {
   min-height: 0;
   grid-template-columns: minmax(0, 1fr) 292px;
   gap: 16px;
-  padding: 18px 22px 20px;
+  padding: 16px 22px 18px;
 }
 
 .gallery-card__main {
@@ -433,7 +437,7 @@ button {
   min-height: 0;
   min-width: 0;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .gallery-card__preview-grid {
@@ -444,14 +448,14 @@ button {
 
 .preview-card {
   display: flex;
-  min-height: 160px;
+  min-height: 146px;
   min-width: 0;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   border: 1px solid rgba(215, 225, 242, 0.92);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.9);
-  padding: 14px 16px;
+  padding: 13px 15px;
 }
 
 .preview-card--primary {
@@ -478,7 +482,7 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1.15;
   letter-spacing: -0.055em;
   font-weight: 600;
@@ -489,7 +493,7 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.4;
   color: #243248;
 }
@@ -498,8 +502,8 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 12px;
+  line-height: 1.5;
   color: #55627b;
 }
 
@@ -510,10 +514,9 @@ button {
 }
 
 .gallery-card__summary {
-  margin-top: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .gallery-card__summary-title {
@@ -521,7 +524,7 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1.12;
   letter-spacing: -0.06em;
   font-weight: 700;
@@ -529,21 +532,21 @@ button {
 }
 
 .gallery-card__summary-title--compact {
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .gallery-card__summary-text {
   max-width: 560px;
   margin: 0;
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 12px;
+  line-height: 1.6;
   color: #4f607b;
 }
 
 .gallery-card__summary-english {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.55;
   color: #50607d;
 }
 
@@ -551,7 +554,7 @@ button {
   display: flex;
   min-height: 0;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 16px;
   border: 1px solid rgba(255, 255, 255, 0.56);
   border-radius: 28px;
@@ -578,13 +581,14 @@ button {
 
 .gallery-card__actions {
   display: flex;
+  margin-top: auto;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .gallery-card__apply {
   display: inline-flex;
-  height: 50px;
+  height: 48px;
   width: 100%;
   align-items: center;
   justify-content: center;
@@ -618,7 +622,7 @@ button {
 
 .soft-button {
   display: inline-flex;
-  height: 42px;
+  height: 40px;
   align-items: center;
   justify-content: center;
   gap: 8px;
